@@ -43,13 +43,14 @@ startSpending() {
 
     level := getBloodwebLevel()
     if (level = -1) {
+        ; Bloodweb is not visible. Open it.
         coords.click(bloodwebTab)
         Sleep(100)
     }
 
     coords.mouseMove(topLeft)
     ToolTip("Autospending... (Alt+Tab to disable)", autopurchaseButton.x, autopurchaseButton.y)
-    CheckPixels()
+    autospend()
 }
 
 disable() {
@@ -58,33 +59,18 @@ disable() {
     setEnabled(false)
     logger.info("Stopped spending")
     ToolTip()
-
-    MouseGetPos(&oldX, &oldY)
-
-    level := getBloodwebLevel()
-    if isGuranteedLevel(level) {
-        ; Interrupt autopurchase
-        Sleep(100)
-        coords.click(characterTab) ; character tab to cancel the autospending
-        Sleep(100)
-        coords.click(bloodwebTab) ; bloodweb tab
-        Sleep(100)
-        scaled.mouseMove(oldX, oldY)
-    }
 }
 
 isGuranteedLevel(level) => level >= 1 and level <= 11 and level != 10
 
 ensureEnabled() {
+    ; Stop if the user tabs out
     if !WinActive(dbdWinTitle)
         disable()
     return enabled
 }
 
-CheckPixels() {
-    ; Stop if the user tabs out or moves the mouse
-    ; MouseGetPos(&mouseX, &mouseY)
-    ; mouseMoved := mouseX != scaled.scaleX(autopurchaseButton.x) || mouseY != scaled.scaleY(autopurchaseButton.y)
+autospend() {
     while ensureEnabled() {
         level := reliablyGetBloodwebLevel()
 
@@ -101,7 +87,7 @@ CheckPixels() {
         }
 
         if ensureEnabled()
-            clickAutoPurchase()
+            slowClick(autopurchaseButton)
     }
 }
 
@@ -118,6 +104,9 @@ buyMarkedItems() {
     waitUntilF(isLoaded)
     Sleep(40) ; Sometimes the icons don't load for a couple frames.
 
+    /**
+     * Overestimate of the number of nodes consumed.
+     */
     approxNodesConsumed := 0
 
     buyItemsAtPoints(points, depth) {
@@ -138,7 +127,6 @@ buyMarkedItems() {
                 )
                 approxNodesConsumed += depth
             }
-
         }
     }
 
@@ -147,6 +135,8 @@ buyMarkedItems() {
     buyItemsAtPoints(bw.middleRing, 2)
 
     ; Only do the inner ring if the entity can actually reach it.
+    ; We always get 6 guaranteed nodes before the entity starts consuming.
+    ; Inner ring has 6 nodes and entity has to consume 2 before hitting inner ring.
     if approxNodesConsumed > 2 {
         buyItemsAtPoints(bw.innerRing, 1)
     }
@@ -160,14 +150,13 @@ cycleBloodweb() {
     Sleep(50)
     coords.click(bloodwebTab) ; bloodweb tab
 }
+
 slowClick(p, holdTime := 50) {
     coords.click(p, "down")
     Sleep(holdTime)
     coords.click(p, "up")
     scaled.mouseMove(0, 0)
 }
-
-clickAutoPurchase() => slowClick(autopurchaseButton)
 
 expectedNextLevel() {
     if (prevLevel = 50)
