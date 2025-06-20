@@ -163,10 +163,10 @@ tallyContinueButtonRed := Coords2K(2421, 1348)
 
 isTallyScreen() {
     isLeftArrowWhiteish() => isWhiteish(coords.getColor(tallyLeftArrowWhite))
-    isLeftArrowBlackish() => isBlackish(coords.getColor(tallyLeftArrowDark),, tolerance := 10)
+    isLeftArrowBlackish() => isBlackish(coords.getColor(tallyLeftArrowDark), , tolerance := 10)
 
     isRightArrowWhite() => isWhiteish(coords.getColor(tallyRightArrowWhite))
-    isRightArrowBlackish() => isBlackish(coords.getColor(tallyRightArrowDark),, tolerance := 10)
+    isRightArrowBlackish() => isBlackish(coords.getColor(tallyRightArrowDark), , tolerance := 10)
 
     isContinueButtonRedish() => isRedish(coords.getColor(tallyContinueButtonRed))
 
@@ -183,4 +183,71 @@ readyButtonRedBar := Coords2K(2430, 1257)
 readyButtonWhiteR := Coords2K(2278, 1260)
 isReadyButtonVisible() {
     return isRedish(coords.getColor(readyButtonRedBar)) and isWhiteish(coords.getColor(readyButtonWhiteR), threshold := 0x90)
+}
+
+class Bloodweb {
+    outerRing := [
+        ; Outer ring ordered from right to left to avoid issues with the tooltip
+        Coords2K(396, 792), ; 9
+        Coords2K(1356, 792), ; 3
+        Coords2K(1289, 1024), ; 4
+        Coords2K(1116, 1199), ; 5
+        Coords2K(1291, 560), ; 2
+        Coords2K(1116, 386), ; 1
+        Coords2K(875, 1263), ; 6
+        Coords2K(876, 322), ; 12
+        Coords2K(635, 1199), ; 7
+        Coords2K(636, 385), ; 11
+        Coords2K(460, 560), ; 10
+        Coords2K(461, 1024), ; 8
+    ]
+
+    middleRing := [
+        Coords2K(554, 711), ; 9:30
+        Coords2K(1198, 874), ; 3:30
+        Coords2K(1114, 1022), ; 4:30
+        Coords2K(958, 1104), ; 5:30
+        Coords2K(1198, 711), ; 2:30
+        Coords2K(1114, 563), ; 1:30
+        Coords2K(793, 1105), ; 6:30
+        Coords2K(958, 480), ; 12:30
+        Coords2K(639, 1021), ; 7:30
+        Coords2K(793, 480), ; 11:30
+        Coords2K(638, 562), ; 10:30
+        Coords2K(554, 874), ; 8:30
+    ]
+
+    innerRing := [
+        Coords2K(1016, 875), ; 4
+        Coords2K(1016, 710), ; 2
+        Coords2K(875, 957), ; 6
+        Coords2K(875, 630), ; 12
+        Coords2K(736, 875), ; 8
+        Coords2K(736, 710), ; 10
+    ]
+
+    all := []
+
+    __New() {
+        this.all.Push(this.outerRing*)
+        this.all.Push(this.middleRing*)
+        this.all.Push(this.innerRing*)
+    }
+
+    isMarker(color) {
+        hsv := colorToHSV(color)
+        h := hsv[1]
+        s := hsv[2]
+        v := hsv[3]
+        ; Target hue is 165, but beige circle bg makes it as warm as 161
+        logger.debug("hsv=" arrayToString(hsv))
+        return h > 160 and h < 168 and s > 50 and v > 25
+    }
+}
+
+arrayToString(arr) {
+    str := "["
+    for s in arr
+        str := str (A_Index = 1 ? "" : ", ") s
+    return str "]"
 }

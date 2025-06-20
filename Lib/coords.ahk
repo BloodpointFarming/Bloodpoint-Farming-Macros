@@ -14,6 +14,7 @@ class CoordsBase {
 
     scaledX() => Round(this.x * dbdWindow.width / this.width)
     scaledY() => Round(this.y * dbdWindow.height / this.height)
+    toString() => "(" this.x ", " this.y ")"
 }
 
 /**
@@ -50,7 +51,7 @@ class CoordsOps {
 
         color := ops.getColor(scaledX, scaledY)
 
-        logger.trace("getColor(" coords.x ", " coords.y ") => (" scaledX ", " scaledY ")=0x" Format("{:06X}", color))
+        logger.trace("getColor(" coords.x ", " coords.y ") => (" scaledX ", " scaledY ")=" Format("{:06X}", color))
 
         return color
     }
