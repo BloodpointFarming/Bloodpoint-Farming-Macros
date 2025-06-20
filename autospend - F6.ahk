@@ -98,10 +98,6 @@ CheckPixels() {
         if !isGuranteedLevel(level) {
             if ensureEnabled()
                 buyMarkedItems()
-
-            ; Hack: We need a better way of ensuring that items are fully loaded.
-            if ensureEnabled()
-                buyMarkedItems()
         }
 
         if ensureEnabled()
@@ -122,33 +118,39 @@ buyMarkedItems() {
     waitUntilF(isLoaded)
     Sleep(40) ; Sometimes the icons don't load for a couple frames.
 
-    start := A_TickCount
-    anyPointMarked := false
-    for point in bw.all {
-        ensureEnabled()
-        if !enabled
-            return
+    approxNodesConsumed := 0
 
-        local thisPoint := point ; scoping issue workaround
+    buyItemsAtPoints(points, depth) {
+        for point in points {
+            ensureEnabled()
+            if !enabled
+                return
 
-        isMarked() => bw.isMarker(coords.getColor(thisPoint))
-        if isMarked() {
-            anyPointMarked := true
-            logger.info(point.toString() " is marked")
-            ; Tooltip "Marked"
-            doWithRetriesUntilF(
-                action := () => slowClick(Coords2K(thisPoint.x + 30, thisPoint.y - 30), 100),
-                predicate := () => !isMarked(),
-                maxDurationMs := 3000,
-                timeBetweenRetries := 1000
-            )
-        } else {
-            msg := point.toString() " is NOT marked"
-            logger.info(msg)
-            ; Tooltip msg
-            ; Sleep(3000)
+            local thisPoint := point ; scoping issue workaround
+
+            isMarked() => bw.isMarker(coords.getColor(thisPoint))
+            if isMarked() {
+                doWithRetriesUntilF(
+                    action := () => slowClick(Coords2K(thisPoint.x + 30, thisPoint.y - 30), 100),
+                    predicate := () => !isMarked(),
+                    maxDurationMs := 5000,
+                    timeBetweenRetries := 2000
+                )
+                approxNodesConsumed += depth
+            }
+
         }
     }
+
+    start := A_TickCount
+    buyItemsAtPoints(bw.outerRing, 3)
+    buyItemsAtPoints(bw.middleRing, 2)
+
+    ; Only do the inner ring if the entity can actually reach it.
+    if approxNodesConsumed > 2 {
+        buyItemsAtPoints(bw.innerRing, 1)
+    }
+
     logger.info("Buying marked items took " (A_TickCount - start) "ms")
 }
 
