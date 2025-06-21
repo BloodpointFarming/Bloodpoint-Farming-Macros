@@ -50,9 +50,12 @@ startSpending() {
         Sleep(100)
     }
 
+    ; Initialize to the current level to avoid cycling again.
+    setPrevLevel(reliablyGetBloodwebLevel())
+
     coords.mouseMove(topLeft)
     apb := coords.scale(Bloodweb.autopurchaseButton)
-    ToolTip("Autospending... (Alt+Tab to disable)", apb.x, apb.y)
+    ToolTip("Autospending... (Alt+Tab to stop)", apb.x, apb.y)
     autospend()
 }
 
