@@ -2,6 +2,7 @@
 
 #Include ..\..\Lib\scaling.ahk
 #Include ..\..\Lib\Gdip_All.ahk
+#Include ..\Yunit\Yunit.ahk
 
 class DbdTestWindow extends DbdWindowOps {
     __New(pBitmap) {

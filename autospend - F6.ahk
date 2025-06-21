@@ -83,7 +83,6 @@ autospend() {
         if (level > 0 && prevLevel != level) {
             ; Load instantly.
             cycleBloodweb()
-            Sleep(100)
             setPrevLevel(level)
         }
 
@@ -105,41 +104,13 @@ buyMarkedItems() {
     waitUntilF(() => Bloodweb.isLoaded(), 3000)
     Sleep(40) ; Sometimes the icons don't load for a couple frames.
 
+    s := Stopwatch("Buy marked items")
     /**
      * Overestimate of the number of nodes consumed.
      */
     approxNodesConsumed := 0
-
-    buyItemsAtPoints(points, depth) {
-        offset := scaled.scaleX(30)
-
-        for point in points {
-            ensureEnabled()
-            if !enabled
-                return
-
-            local tealMarker := point ; scoping issue workaround
-
-            isMarked() {
-                blueMarker := tealMarker.copy(x := tealMarker.x + Ceil(scaled.scaleX(65)))
-                return Bloodweb.isMarker(coords.getColor(tealMarker)) and
-                Bloodweb.isBlueMarker(coords.getColor(blueMarker))
-            }
-            if isMarked() {
-                doWithRetriesUntilF(
-                    action := () => slowClick(tealMarker.copy(tealMarker.x + offset, tealMarker.y - offset), 100),
-                    predicate := () => !isMarked(),
-                    maxDurationMs := 5000,
-                    timeBetweenRetries := 2000
-                )
-                approxNodesConsumed += depth
-            }
-        }
-    }
-
-    start := A_TickCount
-    buyItemsAtPoints(bw.outerRing, 3)
-    buyItemsAtPoints(bw.middleRing, 2)
+    approxNodesConsumed += buyItemsAtPoints(bw.outerRing, 3)
+    approxNodesConsumed += buyItemsAtPoints(bw.middleRing, 2)
 
     ; Only do the inner ring if the entity can actually reach it.
     ; We always get 6 guaranteed nodes before the entity starts consuming.
@@ -147,8 +118,39 @@ buyMarkedItems() {
     if approxNodesConsumed > 2 {
         buyItemsAtPoints(bw.innerRing, 1)
     }
+    s.report()
+}
 
-    logger.info("Buying marked items took " (A_TickCount - start) "ms")
+/**
+ * @reutrns number of nodes consumed
+ */
+buyItemsAtPoints(points, depth) {
+    approxNodesConsumed := 0
+    offset := scaled.scaleX(30)
+
+    for point in points {
+        ensureEnabled()
+        if !enabled
+            return 0
+
+        local tealMarker := point ; scoping issue workaround
+
+        isMarked() {
+            blueMarker := tealMarker.copy(x := tealMarker.x + Ceil(scaled.scaleX(65)))
+            return Bloodweb.isMarker(coords.getColor(tealMarker)) and
+            Bloodweb.isBlueMarker(coords.getColor(blueMarker))
+        }
+        if isMarked() {
+            doWithRetriesUntilF(
+                action := () => slowClick(tealMarker.copy(tealMarker.x + offset, tealMarker.y - offset), 100),
+                predicate := () => !isMarked(),
+                maxDurationMs := 5000,
+                timeBetweenRetries := 2000
+            )
+            approxNodesConsumed += depth
+        }
+    }
+    return approxNodesConsumed
 }
 
 setBloodwebSize() {
@@ -248,6 +250,7 @@ cycleBloodweb() {
 }
 
 slowClick(p, holdTime := 50) {
+    ; logger.info("Clicking " p.toString())
     coords.click(p, "down")
     Sleep(holdTime)
     coords.click(p, "up")
