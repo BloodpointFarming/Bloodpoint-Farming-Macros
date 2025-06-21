@@ -83,6 +83,7 @@ autospend() {
         if (level > 0 && prevLevel != level) {
             ; Load instantly.
             cycleBloodweb()
+            Sleep(100) ; This needs to be here, but should be replaced with condition checking
             setPrevLevel(level)
         }
 
