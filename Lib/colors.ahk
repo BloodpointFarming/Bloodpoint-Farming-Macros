@@ -74,7 +74,6 @@ RGBtoHSV(r, g, b) {
 }
 
 colorToHSV(color) {
-    color := color & 0xFFFFFF
     r := (color >> 16) & 0xFF
     g := (color >> 8) & 0xFF
     b := color & 0xFF

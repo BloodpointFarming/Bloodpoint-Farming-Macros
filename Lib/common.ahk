@@ -7,6 +7,7 @@
 #Include logging.ahk
 #Include retries.ahk
 #Include scaling.ahk
+#Include stopwatch.ahk
 
 #SingleInstance
 Persistent

@@ -235,13 +235,48 @@ class Bloodweb {
     }
 
     isMarker(color) {
-        hsv := colorToHSV(color)
-        h := hsv[1]
-        s := hsv[2]
-        v := hsv[3]
+        ; Inlined for perf since it's hot while identify marker tags.
+        ; Note the early returns in different places for HSV.
+        static inv255 := 1.0 / 255
+
+        ; Quick test for red <= 0x1F, green > 0x80
+        if (color & 0xe08000 != 0x008000)
+            return false
+
+        r := (color >> 16) & 0xFF
+        g := (color >> 8) & 0xFF
+        b := color & 0xFF
+
+        maxVal := Max(r, g, b)
+
+        ; Calculate Value
+        if (maxVal <= 0.25 * 255)
+            return false
+
+        ; Calculate Saturation
+        minVal := Min(r, g, b)
+        delta := maxVal - minVal
+        if (delta = 0)
+            return false ; hue == 0
+
+        ; Saturation as [0..1]
+        s := (delta / maxVal)
+        if (s <= 0.5)
+            return false
+
+        ; Hue calculation (in degrees)
+        if (maxVal = r)
+            h := 60 * Mod(((g - b) / delta), 6)
+        else if (maxVal = g)
+            h := 60 * (((b - r) / delta) + 2)
+        else
+            h := 60 * (((r - g) / delta) + 4)
+
+        if (h < 0)
+            h += 360
+
         ; Target hue is 165, but beige circle bg makes it as warm as 161
-        logger.debug("hsv=" arrayToString(hsv))
-        return h > 160 and h < 168 and s > 50 and v > 25
+        return h > 160 and h < 168
     }
 }
 

@@ -34,6 +34,20 @@ class AutoSpenderTests {
         assertFor("bloodweb\bloodweb_full_1440.png", assertMarkers.Bind(Bloodweb().all))
     }
 
+    test_isMarker() {
+        bw := Bloodweb()
+        for c in ["169679", "0b8b6c", "09896a", "008b69"]
+            Yunit.Assert(bw.isMarker(Integer("0x" c)), "0x" c)
+
+        for c in [
+            "000000", "ffffff",
+            "010101", "fefefe",
+            "0000ff", "ff0000", "00ff00"
+            "7d8986", "021712",
+        ]
+            Yunit.Assert(!bw.isMarker(Integer("0x" c)), c)
+    }
+
 }
 
 assertBloodwebLevel(expectedLevel, screenshotPath) {
