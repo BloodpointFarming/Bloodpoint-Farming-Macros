@@ -8,7 +8,7 @@ https://www.reddit.com/r/deadbydaylight/s/njguTZBODp
 
 setTrayIcon("icons/autopurchase.ico")
 
-bw := Bloodweb()
+bw := Bloodweb([], [], [])
 
 ; Start spending
 ~F6:: {
@@ -38,6 +38,8 @@ setPrevLevel(l) {
 startSpending() {
     if enabled
         return
+
+    setBloodwebSize()
     setEnabled(true)
     logger.info("Started spending")
 
@@ -49,7 +51,8 @@ startSpending() {
     }
 
     coords.mouseMove(topLeft)
-    ToolTip("Autospending... (Alt+Tab to disable)", autopurchaseButton.x, autopurchaseButton.y)
+    apb := coords.scale(Bloodweb.autopurchaseButton)
+    ToolTip("Autospending... (Alt+Tab to disable)", apb.x, apb.y)
     autospend()
 }
 
@@ -87,7 +90,7 @@ autospend() {
         }
 
         if ensureEnabled()
-            slowClick(autopurchaseButton)
+            slowClick(Bloodweb.autopurchaseButton)
     }
 }
 
@@ -96,12 +99,7 @@ buyMarkedItems() {
     scaled.mouseMove(0, 0)
 
     ; Wait for items to load
-    isLoaded() {
-        buttonVisible := isRedish(coords.getColor(autopurchaseButton))
-        buttonLoading := isRedish(coords.getColor(autopurchaseButtonLoading))
-        return buttonVisible && !buttonLoading
-    }
-    waitUntilF(isLoaded)
+    waitUntilF(() => Bloodweb.isLoaded(), 3000)
     Sleep(40) ; Sometimes the icons don't load for a couple frames.
 
     /**
@@ -110,17 +108,23 @@ buyMarkedItems() {
     approxNodesConsumed := 0
 
     buyItemsAtPoints(points, depth) {
+        offset := scaled.scaleX(30)
+
         for point in points {
             ensureEnabled()
             if !enabled
                 return
 
-            local thisPoint := point ; scoping issue workaround
+            local tealMarker := point ; scoping issue workaround
 
-            isMarked() => bw.isMarker(coords.getColor(thisPoint))
+            isMarked() {
+                blueMarker := tealMarker.copy(x := tealMarker.x + Ceil(scaled.scaleX(65)))
+                return Bloodweb.isMarker(coords.getColor(tealMarker)) and
+                Bloodweb.isBlueMarker(coords.getColor(blueMarker))
+            }
             if isMarked() {
                 doWithRetriesUntilF(
-                    action := () => slowClick(Coords2K(thisPoint.x + 30, thisPoint.y - 30), 100),
+                    action := () => slowClick(tealMarker.copy(tealMarker.x + offset, tealMarker.y - offset), 100),
                     predicate := () => !isMarked(),
                     maxDurationMs := 5000,
                     timeBetweenRetries := 2000
@@ -142,6 +146,95 @@ buyMarkedItems() {
     }
 
     logger.info("Buying marked items took " (A_TickCount - start) "ms")
+}
+
+setBloodwebSize() {
+    global bw
+    if dbdWindow.height = 1440
+        bw := Bloodweb(
+            outerRing := [
+                ; Outer ring ordered from right to left to avoid issues with the tooltip
+                Coords2K(396, 792), ; 9
+                Coords2K(1356, 792), ; 3
+                Coords2K(1289, 1024), ; 4
+                Coords2K(1116, 1199), ; 5
+                Coords2K(1291, 560), ; 2
+                Coords2K(1116, 386), ; 1
+                Coords2K(875, 1263), ; 6
+                Coords2K(876, 322), ; 12
+                Coords2K(635, 1199), ; 7
+                Coords2K(636, 385), ; 11
+                Coords2K(460, 560), ; 10
+                Coords2K(461, 1024), ; 8
+            ],
+            middleRing := [
+                Coords2K(554, 711), ; 9:30
+                Coords2K(1198, 874), ; 3:30
+                Coords2K(1114, 1022), ; 4:30
+                Coords2K(958, 1104), ; 5:30
+                Coords2K(1198, 711), ; 2:30
+                Coords2K(1114, 563), ; 1:30
+                Coords2K(793, 1105), ; 6:30
+                Coords2K(958, 480), ; 12:30
+                Coords2K(639, 1021), ; 7:30
+                Coords2K(793, 480), ; 11:30
+                Coords2K(638, 562), ; 10:30
+                Coords2K(554, 874), ; 8:30
+            ],
+            innerRing := [
+                Coords2K(1016, 875), ; 4
+                Coords2K(1016, 710), ; 2
+                Coords2K(875, 957), ; 6
+                Coords2K(875, 630), ; 12
+                Coords2K(736, 875), ; 8
+                Coords2K(736, 710), ; 10
+            ]
+        )
+    else if dbdWindow.height = 1080
+        bw := Bloodweb(
+            outerRing := [
+                ; Outer ring ordered from right to left to avoid issues with the tooltip
+                Coords1080(657, 942),
+                Coords1080(837, 894),
+                Coords1080(968, 763),
+                Coords1080(477, 895),
+                Coords1080(968, 415),
+                Coords1080(837, 284),
+                Coords1080(657, 236),
+                Coords1080(346, 763),
+                Coords1080(1017, 589),
+                Coords1080(477, 284),
+                Coords1080(346, 415),
+                Coords1080(297, 589),
+            ],
+            middleRing := [
+                Coords1080(719, 823),
+                Coords1080(595, 823),
+                Coords1080(835, 761),
+                Coords1080(719, 355),
+                Coords1080(898, 650),
+                Coords1080(595, 355),
+                Coords1080(479, 761),
+                Coords1080(898, 528),
+                Coords1080(835, 417),
+                Coords1080(416, 650),
+                Coords1080(479, 417),
+                Coords1080(416, 528),
+            ],
+            innerRing := [
+                Coords1080(762, 651),
+                Coords1080(657, 712),
+                Coords1080(762, 527),
+                Coords1080(552, 651),
+                Coords1080(657, 467),
+                Coords1080(552, 527),
+            ]
+        )
+    else {
+        MsgBox("Autospend only supports 1080p and 1440p. Run windowed if you need to.")
+        disable()
+        bw := Bloodweb([], [], [])
+    }
 }
 
 cycleBloodweb() {
@@ -180,9 +273,6 @@ reliablyGetBloodwebLevel() {
 
     return level
 }
-
-autopurchaseButton := Coords2K(910, 755)
-autopurchaseButtonLoading := Coords2K(933, 800)
 bloodwebTab := Coords2K(201, 459)
 characterTab := Coords2K(201, 143)
 topLeft := Coords2K(0, 0)

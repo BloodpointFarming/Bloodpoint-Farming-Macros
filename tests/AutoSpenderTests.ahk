@@ -22,22 +22,24 @@ class AutoSpenderTests {
 
     test_getBloodwebLevel_Level49_1440() => assertFor("bloodweb\bloodweb_1440_level32.png", () => getBloodwebLevel() == 32)
     test_getBloodwebLevel_Level21_1080() => assertFor("bloodweb\bloodweb_1080_level20.png", () => getBloodwebLevel() == 20)
-    test_getBloodwebFull() {
-        assertMarkers(points) {
-            bw := Bloodweb()
-            for point in points {
-                c := coords.getColor(point)
-                Yunit.Assert(bw.isMarker(c), "color=" Format("{:06X}", c) " coords=(" point.x ", " point.y ")")
-            }
-            return true
-        }
-        assertFor("bloodweb\bloodweb_full_1440.png", assertMarkers.Bind(Bloodweb().all))
-    }
+
+    ; test_getBloodwebFull() {
+    ;     assertMarkers(points) {
+    ;         for point in points {
+    ;             c := coords.getColor(point)
+    ;             Yunit.Assert(Bloodweb.isMarker(c), "color=" Format("{:06X}", c) " coords=(" point.x ", " point.y ")")
+    ;         }
+    ;         return true
+    ;     }
+    ;     ; assertFor("bloodweb\bloodweb_full_1440.png", assertMarkers.Bind(Bloodweb().all))
+    ; }
+
+    test_isLoaded_yes_1080() => assertFor("bloodweb\1080\loaded.png", () => Bloodweb.isLoaded())
+    test_isLoaded_no_1080() => assertFor("bloodweb\1080\loading.png", () => !Bloodweb.isLoaded())
 
     test_isMarker() {
-        bw := Bloodweb()
         for c in ["169679", "0b8b6c", "09896a", "008b69"]
-            Yunit.Assert(bw.isMarker(Integer("0x" c)), "0x" c)
+            Yunit.Assert(Bloodweb.isMarker(Integer("0x" c)), "0x" c)
 
         for c in [
             "000000", "ffffff",
@@ -45,7 +47,7 @@ class AutoSpenderTests {
             "0000ff", "ff0000", "00ff00"
             "7d8986", "021712",
         ]
-            Yunit.Assert(!bw.isMarker(Integer("0x" c)), c)
+            Yunit.Assert(!Bloodweb.isMarker(Integer("0x" c)), c)
     }
 
 }

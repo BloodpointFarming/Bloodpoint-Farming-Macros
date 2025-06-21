@@ -186,62 +186,38 @@ isReadyButtonVisible() {
 }
 
 class Bloodweb {
-    outerRing := [
-        ; Outer ring ordered from right to left to avoid issues with the tooltip
-        Coords2K(396, 792), ; 9
-        Coords2K(1356, 792), ; 3
-        Coords2K(1289, 1024), ; 4
-        Coords2K(1116, 1199), ; 5
-        Coords2K(1291, 560), ; 2
-        Coords2K(1116, 386), ; 1
-        Coords2K(875, 1263), ; 6
-        Coords2K(876, 322), ; 12
-        Coords2K(635, 1199), ; 7
-        Coords2K(636, 385), ; 11
-        Coords2K(460, 560), ; 10
-        Coords2K(461, 1024), ; 8
-    ]
-
-    middleRing := [
-        Coords2K(554, 711), ; 9:30
-        Coords2K(1198, 874), ; 3:30
-        Coords2K(1114, 1022), ; 4:30
-        Coords2K(958, 1104), ; 5:30
-        Coords2K(1198, 711), ; 2:30
-        Coords2K(1114, 563), ; 1:30
-        Coords2K(793, 1105), ; 6:30
-        Coords2K(958, 480), ; 12:30
-        Coords2K(639, 1021), ; 7:30
-        Coords2K(793, 480), ; 11:30
-        Coords2K(638, 562), ; 10:30
-        Coords2K(554, 874), ; 8:30
-    ]
-
-    innerRing := [
-        Coords2K(1016, 875), ; 4
-        Coords2K(1016, 710), ; 2
-        Coords2K(875, 957), ; 6
-        Coords2K(875, 630), ; 12
-        Coords2K(736, 875), ; 8
-        Coords2K(736, 710), ; 10
-    ]
-
     all := []
 
-    __New() {
-        this.all.Push(this.outerRing*)
-        this.all.Push(this.middleRing*)
-        this.all.Push(this.innerRing*)
+    __New(outerRing, middleRing, innerRing) {
+        this.outerRing := outerRing
+        this.middleRing := middleRing
+        this.innerRing := innerRing
+        this.all.Push(outerRing*)
+        this.all.Push(middleRing*)
+        this.all.Push(innerRing*)
     }
 
-    isMarker(color) {
+    static isMarker(color) => Bloodweb.matchesHue(color, 160, 168)
+
+    static isBlueMarker(color) => Bloodweb.matchesHue(color, 243, 253)
+
+    static autopurchaseButton := Coords2K(910, 755)
+    static autopurchaseButtonLoading() => dbdWindow.height = 1080 ? Coords1080(700, 596) : Coords2K(933, 800)
+
+    static isLoaded() {
+        buttonVisible := isRedish(coords.getColor(Bloodweb.autopurchaseButton))
+        buttonLoading := isRedish(coords.getColor(Bloodweb.autopurchaseButtonLoading()))
+        return buttonVisible && !buttonLoading
+    }
+
+    static matchesHue(color, hueMin, hueMax) {
         ; Inlined for perf since it's hot while identify marker tags.
         ; Note the early returns in different places for HSV.
         static inv255 := 1.0 / 255
 
-        ; Quick test for red <= 0x1F, green > 0x80
-        if (color & 0xe08000 != 0x008000)
-            return false
+        ; ; Quick test for red <= 0x1F, green > 0x80
+        ; if (color & 0xe08000 != 0x008000)
+        ;     return false
 
         r := (color >> 16) & 0xFF
         g := (color >> 8) & 0xFF
@@ -276,7 +252,7 @@ class Bloodweb {
             h += 360
 
         ; Target hue is 165, but beige circle bg makes it as warm as 161
-        return h > 160 and h < 168
+        return h > hueMin and h < hueMax
     }
 }
 

@@ -11,7 +11,6 @@ imageDir := A_MyDocuments "\..\dbd\screenshots\bloodweb\nodes\1080"
 imageHeight := 1080
 MarkerThreshold := imageHeight * 20 / 1080 ; Pixel distance threshold to group points into the same marker
 minBlobWidth := imageHeight * 5 / 1080
-bw := Bloodweb()
 
 ; Ignore regions where markers cannot appear for perf
 bloodwebXStartPct := 260 / 1920
@@ -136,7 +135,7 @@ findMarkers() {
 
     logger.info("=== Sorted Markers ===")
     for dist, bottomLeft in sortedMarkers {
-        logger.info("Common marker at: (" bottomLeft.x ", " bottomLeft.y ") dist=" dist)
+        OutputDebug("Coords1080(" bottomLeft.x ", " bottomLeft.y ")") ; dist=" dist)
     }
 }
 
@@ -190,7 +189,7 @@ distance(pt1, pt2) {
     return Sqrt(dx * dx + dy * dy)
 }
 
-isMarker(rgb) => bw.isMarker(rgb)
+isMarker(rgb) => Bloodweb.isMarker(rgb)
 
 isBlobMarker(blob) {
     if blob.Length < minBlobWidth * minBlobWidth

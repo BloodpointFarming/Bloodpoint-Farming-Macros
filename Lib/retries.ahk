@@ -34,8 +34,8 @@ doWithRetriesUntilF(
     startTime := A_TickCount  ; Get the current time (in milliseconds)
 
     if predicate.Call() {
-        logger.info("predicate took " . (A_TickCount - startTime) . " ms.")
-        return
+        ; logger.info("predicate took " . (A_TickCount - startTime) . " ms.")
+        return true
     }
 
     while (A_TickCount - startTime < maxDurationMs) {
@@ -49,14 +49,15 @@ doWithRetriesUntilF(
         while A_TickCount - actionTime < timeBetweenRetries {
             if predicate.Call() {
                 duration := A_TickCount - startTime
-                logger.info("predicate took " . (A_TickCount - startTime) . " ms.")
-                return
+                ; logger.info("predicate took " . (A_TickCount - startTime) . " ms.")
+                return true
             }
             Sleep(10)
         }
     }
 
     logger.warn("Failed waiting for predicate after " . maxDurationMs . " ms.")
+    return false
 }
 
 waitUntilF(predicate, maxDurationMs := 500) => doWithRetriesUntilF(doNothing, predicate, maxDurationMs)
