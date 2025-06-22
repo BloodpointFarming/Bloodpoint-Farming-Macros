@@ -23,6 +23,9 @@ class PBitmapImage {
     getColor(x, y) {
         if (x < 0 || y < 0)
             throw Error("Coordinates must be non-negative")
+        if x >= this.width or y >= this.height
+            throw Error("(" x ", " y ") out of bounds for " this.width "x" this.height)
+
         offset := y * this.stride + x * 4
         pixel := NumGet(this.scan0 + offset, "UInt")  ; Format: ARGB
         return pixel & 0xFFFFFF

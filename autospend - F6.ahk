@@ -21,7 +21,7 @@ bw := Bloodweb([], [], [])
 
 ~^+F6:: {
     ; Debug stub to check level-detection without actually spending
-    reliablyGetBloodwebLevel()
+    getBloodwebLevel()
 }
 
 prevLevel := -1
@@ -68,7 +68,7 @@ startSpending() {
     }
 
     ; Initialize to the current level to avoid cycling unnecessarily.
-    setPrevLevel(reliablyGetBloodwebLevel())
+    setPrevLevel(getBloodwebLevel())
 
     coords.mouseMove(topLeft)
     apb := coords.scale(Bloodweb.autopurchaseButton)
@@ -78,7 +78,7 @@ startSpending() {
 
 autospend() {
     while ensureEnabled() {
-        level := reliablyGetBloodwebLevel()
+        level := getBloodwebLevel()
         logger.info("Level " level)
 
         if (level > 0 && prevLevel != level) {
@@ -120,7 +120,7 @@ clickAutopurchase() {
     slowClick(Bloodweb.autopurchaseButton)
 }
 
-hasLevelChanged() => reliablyGetBloodwebLevel() = prevLevel
+hasLevelChanged() => getBloodwebLevel() = prevLevel
 
 isGuranteedLevel(level) => level >= 1 and level <= 11 and level != 10
 
@@ -235,22 +235,6 @@ expectedNextLevel() {
     return prevLevel + 1
 }
 
-reliablyGetBloodwebLevel() {
-    level := getBloodwebLevel()
-
-    expected := expectedNextLevel()
-    if (level != -1 && level != prevLevel && level != expected) {
-        logger.warn("Surprise level! expected=" expected " actual=" level)
-        ; Wait, really? Maybe we split reads across two frames.
-        ; Hopefully trying again fixes it.
-        Sleep(100)
-        level := getBloodwebLevel()
-    }
-
-    logger.trace("level=" level)
-
-    return level
-}
 bloodwebTab := Coords2K(201, 459)
 characterTab := Coords2K(201, 143)
 topLeft := Coords2K(0, 0)

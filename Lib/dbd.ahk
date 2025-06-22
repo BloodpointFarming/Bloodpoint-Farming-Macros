@@ -53,9 +53,14 @@ getBloodwebLevel() {
         return -1
     }
 
+    if dbdWindow.height = 1080
+        screenshot := Subscreenshot.of(601, 80, 24, 16)
+    else
+        screenshot := Subscreenshot.of(795, 106, 33, 22)
+
     isLit(x, y) {
         ; Check if the pixel is plausibly text in the bloodweb.
-        color := ops.getColor(x, y) ; no scaling! coords are specific to 1080 or 1440.
+        color := screenshot.getColorLiteral(x, y) ; no scaling! coords are specific to 1080 or 1440.
 
         r := (color >> 16) & 0xFF
         g := (color >> 8) & 0xFF
@@ -86,6 +91,7 @@ getBloodwebLevel() {
     } else if (dbdWindow.height = 1440) {
         digit1 := isLit(820, 120) ? (isLit(814, 117) ? (isLit(816, 128) ? (isLit(814, 111) ? (9) : (-1)) : (isLit(822, 121) ? (4) : (-1))) : (isLit(827, 126) ? (isLit(824, 108) ? (2) : (-1)) : (isLit(827, 106) ? (isLit(813, 107) ? (7) : (-1)) : (isLit(822, 123) ? (1) : (-1))))) : (isLit(826, 112) ? (isLit(814, 118) ? (isLit(820, 117) ? (isLit(814, 123) ? (8) : (-1)) : (isLit(816, 123) ? (0) : (-1))) : (isLit(814, 111) ? (3) : (-1))) : (isLit(814, 120) ? (isLit(817, 126) ? (6) : (-1)) : (isLit(825, 120) ? (5) : (-1))))
     }
+    screenshot.dispose()
 
     logger.debug("digit10=" digit10 " digit1=" digit1)
 
@@ -208,8 +214,8 @@ class Bloodweb {
             this.maxX := Max(this.maxX, point.x)
             this.maxY := Max(this.maxY, point.y)
         }
-        this.width := this.maxX - this.minX
-        this.height := this.maxY - this.minY
+        this.width := this.maxX - this.minX + 1
+        this.height := this.maxY - this.minY + 1
     }
 
     static fromHeight(height) {
