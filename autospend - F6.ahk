@@ -112,7 +112,7 @@ autospend() {
         ; Retry until something happens.
         doWithRetriesUntilF(
             action := clickAutopurchase,
-            predicate := hasLevelChanged or !ensureEnabled(),
+            predicate := hasLevelChanged or !ensureEnabled,
             maxDurationMs := 10000,
             timeBetweenRetries := 500
         )
@@ -194,7 +194,7 @@ buyItemsAtPoints(points, depth, sceenshot) {
             ; Node was of interest at the time the screnshot was taken
             waitUntilF(() => !Bloodweb.isLoading(), 3000)
             doWithRetriesUntilF(
-                action := () => slowClick(node.center, 100),
+                action := () => clickNode(node),
                 predicate := () => !isTeal(coords) or !enabled,
                 maxDurationMs := 5000,
                 timeBetweenRetries := 2000
@@ -230,6 +230,10 @@ slowClick(p, holdTime := 50) {
     coords.click(p, "down")
     Sleep(holdTime)
     coords.click(p, "up")
+}
+
+clickNode(node) {
+    slowClick(node.center, 100)
     scaled.mouseMove(0, 0)
 }
 
