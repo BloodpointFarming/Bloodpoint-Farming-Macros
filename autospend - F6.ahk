@@ -8,6 +8,7 @@ https://www.reddit.com/r/deadbydaylight/s/njguTZBODp
 
 setTrayIcon("icons/autopurchase.ico")
 
+debug := true
 bw := Bloodweb([], [], [])
 
 ; Start spending
@@ -71,26 +72,34 @@ startSpending() {
 
     coords.mouseMove(topLeft)
     apb := coords.scale(Bloodweb.autopurchaseButton)
-    ToolTip("Autospending... (Alt+Tab to stop)", apb.x, apb.y)
+    ; ToolTip("Autospending... (Alt+Tab to stop)", apb.x, apb.y)
     autospend()
 }
 
 autospend() {
     while ensureEnabled() {
         level := reliablyGetBloodwebLevel()
+        logger.info("Level " level)
 
         if (level > 0 && prevLevel != level) {
             ; Cancel the bloodweb loading animation
             cycleBloodweb()
-            while !waitUntilF(() => Bloodweb.isLoaded(), 4000) {
-                ; Bloodweb didn't load. Why?
-                if Bloodweb.isBloodwebError() {
-                    coords.click(Bloodweb.bloodwebErrorOkButtonRed)
-                } else {
-                    coords.click(bloodwebTab)
-                }
-            }
             setPrevLevel(level)
+        }
+
+        ; Wait for the bloodweb to load.
+        while !waitUntilF(() => Bloodweb.isLoaded(), 10000) {
+            ; Bloodweb didn't load. Why?
+            if !ensureEnabled()
+                return
+
+            logger.warn("Bloodweb didn't load!")
+            if Bloodweb.isBloodwebError() {
+                logger.info("Handling bloodweb error.")
+                coords.click(Bloodweb.bloodwebErrorOkButtonRed)
+            } else {
+                coords.click(bloodwebTab)
+            }
         }
 
         if !isGuranteedLevel(level) {
@@ -98,20 +107,31 @@ autospend() {
                 buyMarkedItems()
         }
 
-        if ensureEnabled()
-            slowClick(Bloodweb.autopurchaseButton)
+        clickAutopurchase()
+        ; Retry until something happens.
+        while ensureEnabled() and !waitUntilF(hasLevelChanged, 200) {
+            clickAutopurchase()
+        }
     }
 }
+
+clickAutopurchase() {
+    logger.info("Clicking autopurchase.")
+    slowClick(Bloodweb.autopurchaseButton)
+}
+
+hasLevelChanged() => reliablyGetBloodwebLevel() = prevLevel
 
 isGuranteedLevel(level) => level >= 1 and level <= 11 and level != 10
 
 buyMarkedItems() {
+    logger.debug("Checking for marked items")
     ; Hide autopurchase tooltip
     scaled.mouseMove(0, 0)
 
     ; Wait for items to load
     waitUntilF(() => Bloodweb.isLoaded(), 3000)
-    Sleep(40) ; Sometimes the icons don't load for a couple frames.
+    Sleep(40) ; Sometimes the icons don't load for a couple frames. This needs to be here!
 
     sw := Stopwatch("Buy marked items")
     /**
@@ -135,8 +155,20 @@ buyMarkedItems() {
     if approxNodesConsumed > 2 {
         buyItemsAtPoints(bw.innerRing, 1, screenshot)
     }
+    saveScreenshot(screenshot)
     screenshot.dispose()
     sw.report()
+}
+
+saveScreenshot(screenshot) {
+    if debug {
+        dir := A_Temp "\Autospend"
+        path := dir "\level-" prevLevel ".png"
+        if !DirExist(dir)
+            DirCreate(dir)
+        Gdip_SaveBitmapToFile(screenshot.img.pBitmap, path)
+        logger.info("Screenshot saved to " path)
+    }
 }
 
 /**
@@ -146,9 +178,8 @@ buyItemsAtPoints(points, depth, sceenshot) {
     approxNodesConsumed := 0
 
     for point in points {
-        ensureEnabled()
-        if !enabled
-            return 0
+        if !ensureEnabled()
+            return approxNodesConsumed
 
         local node := Bloodweb.BloodwebNode(point)
 
@@ -160,7 +191,7 @@ buyItemsAtPoints(points, depth, sceenshot) {
             waitUntilF(() => !Bloodweb.isLoading(), 3000)
             doWithRetriesUntilF(
                 action := () => slowClick(node.center(), 100),
-                predicate := () => !isTeal(coords),
+                predicate := () => !isTeal(coords) or !enabled,
                 maxDurationMs := 5000,
                 timeBetweenRetries := 2000
             )
@@ -181,13 +212,17 @@ setBloodwebSize() {
 
 cycleBloodweb() {
     ; Closing and opening the bloodweb skips the "level" interstitial
+    logger.info("Cycling bloodweb")
     coords.click(bloodwebTab) ; bloodweb tab
     Sleep(50)
     coords.click(bloodwebTab) ; bloodweb tab
 }
 
 slowClick(p, holdTime := 50) {
-    ; logger.info("Clicking " p.toString())
+    if !ensureEnabled()
+        return
+
+    logger.info("Clicking " p.toString())
     coords.click(p, "down")
     Sleep(holdTime)
     coords.click(p, "up")

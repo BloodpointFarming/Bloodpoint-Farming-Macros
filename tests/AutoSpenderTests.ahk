@@ -31,8 +31,10 @@ class AutoSpenderTests {
             }
             return true
         }
-        ; assertFor("bloodweb\bloodweb_full_1440.png", assertMarkers.Bind(Bloodweb().all))
+        assertFor("bloodweb\bloodweb_full_1440.png", assertMarkers.Bind(Bloodweb.fromHeight(1440).all))
     }
+
+    test_isMarked() => assertFor("bloodweb\1440\laurie.png", () => countBloodwebItems() = 3)
 
     test_isLoaded_yes_1080() => assertFor("bloodweb\1080\loaded.png", () => Bloodweb.isLoaded())
     test_isLoaded_no_1080() => assertFor("bloodweb\1080\loading.png", () => !Bloodweb.isLoaded())
@@ -50,8 +52,7 @@ class AutoSpenderTests {
             Yunit.Assert(!Bloodweb.isTealMarker(Integer("0x" c)), c)
     }
 
-        test_isBloodwebError() => assertFor("bloodweb\bloodweb_error.png", () => Bloodweb.isBloodwebError())
-
+    test_isBloodwebError() => assertFor("bloodweb\bloodweb_error.png", () => Bloodweb.isBloodwebError())
 
 }
 
@@ -60,4 +61,17 @@ assertBloodwebLevel(expectedLevel, screenshotPath) {
     level := getBloodwebLevel()
     Gdip_DisposeImage(pBitmap)
     Yunit.Assert(level == expectedLevel, "level=" level " expected=" expectedLevel)
+}
+
+countBloodwebItems() {
+    c := 0
+    bw := Bloodweb.fromHeight(dbdWindow.height)
+    for point in bw.all {
+        node := Bloodweb.BloodwebNode(point)
+        teal := coords.getColor(node.bottomLeft)
+        blue := coords.getColor(node.bottomRight)
+        if Bloodweb.isTealMarker(teal) and Bloodweb.isBlueMarker(blue)
+            c += 1
+    }
+    return c
 }
