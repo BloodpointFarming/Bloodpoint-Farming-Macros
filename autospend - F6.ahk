@@ -112,9 +112,9 @@ autospend() {
         ; Retry until something happens.
         doWithRetriesUntilF(
             action := clickAutopurchase,
-            predicate := hasLevelChanged or !ensureEnabled,
+            predicate := hasLevelChanged or !ensureEnabled(),
             maxDurationMs := 10000,
-            timeBetweenRetries := 200
+            timeBetweenRetries := 500
         )
     }
 }
