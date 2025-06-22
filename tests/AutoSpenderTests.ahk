@@ -3,6 +3,7 @@
 #Include Lib\test_includes.ahk
 #Include Lib\fakes.ahk
 #Include ..\Lib\Gdip_All.ahk
+#Include ..\Lib\bloodweb.ahk
 #Include ..\Lib\dbd.ahk
 #Include ..\Lib\scaling.ahk
 
@@ -24,10 +25,11 @@ class AutoSpenderTests {
     test_getBloodwebLevel_Level21_1080() => assertFor("bloodweb\bloodweb_1080_level20.png", () => getBloodwebLevel() == 20)
 
     test_getBloodwebFull() {
-        assertMarkers(points) {
-            for point in points {
-                c := coords.getColor(point)
-                Yunit.Assert(Bloodweb.isTealMarker(c), "color=" Format("{:06X}", c) " coords=(" point.x ", " point.y ")")
+        assertMarkers(nodes) {
+            for node in nodes {
+                teal := node.bottomLeft
+                c := coords.getColor(teal)
+                Yunit.Assert(Bloodweb.isTealMarker(c), "color=" Format("{:06X}", c) " coords=(" teal.x ", " teal.y ")")
             }
             return true
         }
@@ -66,8 +68,7 @@ assertBloodwebLevel(expectedLevel, screenshotPath) {
 countBloodwebItems() {
     c := 0
     bw := Bloodweb.fromHeight(dbdWindow.height)
-    for point in bw.all {
-        node := Bloodweb.BloodwebNode(point)
+    for node in bw.all {
         teal := coords.getColor(node.bottomLeft)
         blue := coords.getColor(node.bottomRight)
         if Bloodweb.isTealMarker(teal) and Bloodweb.isBlueMarker(blue)

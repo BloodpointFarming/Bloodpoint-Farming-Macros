@@ -5,6 +5,7 @@ https://www.reddit.com/r/deadbydaylight/s/njguTZBODp
 */
 #HotIf WinActive(dbdWinTitle)
 #Include Lib\common.ahk
+#Include Lib\bloodweb.ahk
 
 setTrayIcon("icons/autopurchase.ico")
 
@@ -109,9 +110,12 @@ autospend() {
 
         clickAutopurchase()
         ; Retry until something happens.
-        while ensureEnabled() and !waitUntilF(hasLevelChanged, 200) {
-            clickAutopurchase()
-        }
+        doWithRetriesUntilF(
+            action := clickAutopurchase,
+            predicate := hasLevelChanged or !ensureEnabled,
+            maxDurationMs := 10000,
+            timeBetweenRetries := 200
+        )
     }
 }
 
@@ -120,7 +124,7 @@ clickAutopurchase() {
     slowClick(Bloodweb.autopurchaseButton)
 }
 
-hasLevelChanged() => getBloodwebLevel() = prevLevel
+hasLevelChanged() => getBloodwebLevel() != prevLevel
 
 isGuranteedLevel(level) => level >= 1 and level <= 11 and level != 10
 
@@ -181,7 +185,7 @@ buyItemsAtPoints(points, depth, sceenshot) {
         if !ensureEnabled()
             return approxNodesConsumed
 
-        local node := Bloodweb.BloodwebNode(point)
+        local node := point
 
         isTeal(api) => Bloodweb.isTealMarker(api.getColor(node.bottomLeft))
         isBlue(api) => Bloodweb.isBlueMarker(api.getColor(node.bottomRight))
@@ -190,7 +194,7 @@ buyItemsAtPoints(points, depth, sceenshot) {
             ; Node was of interest at the time the screnshot was taken
             waitUntilF(() => !Bloodweb.isLoading(), 3000)
             doWithRetriesUntilF(
-                action := () => slowClick(node.center(), 100),
+                action := () => slowClick(node.center, 100),
                 predicate := () => !isTeal(coords) or !enabled,
                 maxDurationMs := 5000,
                 timeBetweenRetries := 2000
@@ -222,7 +226,7 @@ slowClick(p, holdTime := 50) {
     if !ensureEnabled()
         return
 
-    logger.info("Clicking " p.toString())
+    logger.debug("Clicking " p.toString())
     coords.click(p, "down")
     Sleep(holdTime)
     coords.click(p, "up")

@@ -21,6 +21,6 @@ class LoggerOps {
         this.write("debug: " msg)
     }
     trace(msg) {
-        this.write("trace: " msg)
+        ; this.write("trace: " msg)
     }
 }

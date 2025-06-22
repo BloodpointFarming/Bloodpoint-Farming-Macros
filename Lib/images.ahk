@@ -58,9 +58,11 @@ class PBitmapImage {
         DllCall("ClientToScreen", "ptr", hwnd, "ptr", pt)
         wx := NumGet(pt, 0, "int")
         wy := NumGet(pt, 4, "int")
-        return PBitmapImage(Gdip_BitmapFromScreen(wx + x "|" wy + y "|" w "|" h))
+        return PBitmapImage(Gdip_BitmapFromScreenDelegate(wx + x, wy + y, w, h))
     }
 }
+
+Gdip_BitmapFromScreenDelegate := (x, y, w, h) => Gdip_BitmapFromScreen(x "|" y "|" w "|" h)
 
 /**
  * Screenshots a sub-section of the screen.

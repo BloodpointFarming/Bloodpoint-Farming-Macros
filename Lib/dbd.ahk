@@ -56,7 +56,7 @@ getBloodwebLevel() {
     if dbdWindow.height = 1080
         screenshot := Subscreenshot.of(601, 80, 24, 16)
     else
-        screenshot := Subscreenshot.of(795, 106, 33, 22)
+        screenshot := Subscreenshot.of(795, 106, 33, 23)
 
     isLit(x, y) {
         ; Check if the pixel is plausibly text in the bloodweb.
@@ -73,19 +73,19 @@ getBloodwebLevel() {
         isBright := l >= 0xA0 / 0xFF
         isDesaturated := s < 0.15
 
-        logger.debug("(" x ", " y ")=" color " isBright=" isBright " isDesaturated=" isDesaturated " s=" s)
+        logger.trace("(" x ", " y ")=" color " isBright=" isBright " isDesaturated=" isDesaturated " s=" s)
 
         return isBright && isDesaturated
     }
 
-    logger.debug("tens:")
+    logger.trace("tens:")
     if (dbdWindow.height = 1080) {
         digit10 := isLit(601, 86) ? (isLit(610, 84) ? (isLit(601, 92) ? (isLit(605, 88) ? (isLit(605, 81) ? (8) : (-1)) : (isLit(605, 81) ? (0) : (-1))) : (isLit(608, 93) ? (9) : (-1))) : (isLit(602, 80) ? (isLit(608, 93) ? (5) : (-1)) : (isLit(605, 81) ? (6) : (-1)))) : (isLit(610, 92) ? (isLit(602, 81) ? (isLit(608, 93) ? (3) : (-1)) : (isLit(604, 92) ? (4) : (-1))) : (isLit(601, 84) ? (isLit(601, 95) ? (isLit(607, 90) ? (2) : (-1)) : (isLit(607, 90) ? (1) : (-1))) : (isLit(607, 90) ? (7) : (-1))))
     } else if (dbdWindow.height = 1440) {
         digit10 := isLit(802, 120) ? (isLit(796, 117) ? (isLit(798, 128) ? (isLit(796, 111) ? (9) : (-1)) : (isLit(804, 121) ? (4) : (-1))) : (isLit(809, 126) ? (isLit(806, 108) ? (2) : (-1)) : (isLit(809, 106) ? (isLit(795, 107) ? (7) : (-1)) : (isLit(804, 123) ? (1) : (-1))))) : (isLit(808, 112) ? (isLit(796, 118) ? (isLit(802, 117) ? (isLit(796, 123) ? (8) : (-1)) : (isLit(798, 123) ? (0) : (-1))) : (isLit(796, 111) ? (3) : (-1))) : (isLit(796, 120) ? (isLit(799, 126) ? (6) : (-1)) : (isLit(807, 120) ? (5) : (-1))))
     }
 
-    logger.debug("ones:")
+    logger.trace("ones:")
     if (dbdWindow.height = 1080) {
         digit1 := isLit(615, 86) ? (isLit(624, 84) ? (isLit(615, 92) ? (isLit(619, 88) ? (isLit(619, 81) ? (8) : (-1)) : (isLit(619, 81) ? (0) : (-1))) : (isLit(622, 93) ? (9) : (-1))) : (isLit(616, 80) ? (isLit(622, 93) ? (5) : (-1)) : (isLit(619, 81) ? (6) : (-1)))) : (isLit(624, 92) ? (isLit(616, 81) ? (isLit(622, 93) ? (3) : (-1)) : (isLit(618, 92) ? (4) : (-1))) : (isLit(615, 84) ? (isLit(615, 95) ? (isLit(621, 90) ? (2) : (-1)) : (isLit(621, 90) ? (1) : (-1))) : (isLit(621, 90) ? (7) : (-1))))
     } else if (dbdWindow.height = 1440) {
@@ -93,7 +93,7 @@ getBloodwebLevel() {
     }
     screenshot.dispose()
 
-    logger.debug("digit10=" digit10 " digit1=" digit1)
+    logger.trace("digit10=" digit10 " digit1=" digit1)
 
     ; Bloodweb level is left-aligned, so the tens digit actually houses levels 0-9 and the ones digit is empty.
     ; If tens digit is missing, then it's not a valid bloodweb level.
@@ -101,7 +101,9 @@ getBloodwebLevel() {
         return -1
     if (digit1 = -1)
         return digit10
-    return digit10 * 10 + digit1
+    level := digit10 * 10 + digit1
+    logger.debug("level=" level)
+    return level
 }
 
 isAbandonEscapeOptionVisible() {
@@ -190,203 +192,4 @@ readyButtonRedBar := Coords2K(2430, 1257)
 readyButtonWhiteR := Coords2K(2278, 1260)
 isReadyButtonVisible() {
     return isRedish(coords.getColor(readyButtonRedBar)) and isWhiteish(coords.getColor(readyButtonWhiteR), threshold := 0x90)
-}
-
-class Bloodweb {
-    all := []
-
-    __New(outerRing, middleRing, innerRing) {
-        this.outerRing := outerRing
-        this.middleRing := middleRing
-        this.innerRing := innerRing
-        this.all.Push(outerRing*)
-        this.all.Push(middleRing*)
-        this.all.Push(innerRing*)
-
-        ; Find the bounds for screenshotting later.
-        this.minX := 9999
-        this.minY := 9999
-        this.maxX := 0
-        this.maxY := 0
-        for point in this.all {
-            this.minX := Min(this.minX, point.x)
-            this.minY := Min(this.minY, point.y)
-            this.maxX := Max(this.maxX, point.x)
-            this.maxY := Max(this.maxY, point.y)
-        }
-        this.width := this.maxX - this.minX + 1
-        this.height := this.maxY - this.minY + 1
-    }
-
-    static fromHeight(height) {
-        if height = 1440
-            return Bloodweb(
-                outerRing := [
-                    ; Outer ring ordered from right to left to avoid issues with the tooltip
-                    Coords2K(396, 792), ; 9
-                    Coords2K(1356, 792), ; 3
-                    Coords2K(1289, 1024), ; 4
-                    Coords2K(1116, 1199), ; 5
-                    Coords2K(1291, 560), ; 2
-                    Coords2K(1116, 386), ; 1
-                    Coords2K(875, 1263), ; 6
-                    Coords2K(876, 322), ; 12
-                    Coords2K(635, 1199), ; 7
-                    Coords2K(636, 385), ; 11
-                    Coords2K(460, 560), ; 10
-                    Coords2K(461, 1024), ; 8
-                ],
-                middleRing := [
-                    Coords2K(554, 711), ; 9:30
-                    Coords2K(1198, 874), ; 3:30
-                    Coords2K(1114, 1022), ; 4:30
-                    Coords2K(958, 1104), ; 5:30
-                    Coords2K(1198, 711), ; 2:30
-                    Coords2K(1114, 563), ; 1:30
-                    Coords2K(793, 1105), ; 6:30
-                    Coords2K(958, 480), ; 12:30
-                    Coords2K(639, 1021), ; 7:30
-                    Coords2K(793, 480), ; 11:30
-                    Coords2K(638, 562), ; 10:30
-                    Coords2K(554, 874), ; 8:30
-                ],
-                innerRing := [
-                    Coords2K(1016, 875), ; 4
-                    Coords2K(1016, 710), ; 2
-                    Coords2K(875, 957), ; 6
-                    Coords2K(875, 630), ; 12
-                    Coords2K(736, 875), ; 8
-                    Coords2K(736, 710), ; 10
-                ]
-            )
-        else if height = 1080
-            return Bloodweb(
-                outerRing := [
-                    ; Outer ring ordered from right to left to avoid issues with the tooltip
-                    Coords1080(657, 942),
-                    Coords1080(837, 894),
-                    Coords1080(968, 763),
-                    Coords1080(477, 895),
-                    Coords1080(968, 415),
-                    Coords1080(837, 284),
-                    Coords1080(657, 236),
-                    Coords1080(346, 763),
-                    Coords1080(1017, 589),
-                    Coords1080(477, 284),
-                    Coords1080(346, 415),
-                    Coords1080(297, 589),
-                ],
-                middleRing := [
-                    Coords1080(719, 823),
-                    Coords1080(595, 823),
-                    Coords1080(835, 761),
-                    Coords1080(719, 355),
-                    Coords1080(898, 650),
-                    Coords1080(595, 355),
-                    Coords1080(479, 761),
-                    Coords1080(898, 528),
-                    Coords1080(835, 417),
-                    Coords1080(416, 650),
-                    Coords1080(479, 417),
-                    Coords1080(416, 528),
-                ],
-                innerRing := [
-                    Coords1080(762, 651),
-                    Coords1080(657, 712),
-                    Coords1080(762, 527),
-                    Coords1080(552, 651),
-                    Coords1080(657, 467),
-                    Coords1080(552, 527),
-                ]
-            )
-        else
-            return Bloodweb([], [], [])
-    }
-
-    subscreenshot() => Subscreenshot.of(this.minX, this.minY, this.width, this.height)
-
-    static isTealMarker(color) => Bloodweb.matchesHue(color, 160, 168)
-
-    static isBlueMarker(color) => Bloodweb.matchesHue(color, 243, 253)
-
-    static autopurchaseButton := Coords2K(910, 755)
-    static autopurchaseButtonLoading() => dbdWindow.height = 1080 ? Coords1080(700, 596) : Coords2K(933, 800)
-
-    static isLoaded() {
-        buttonVisible := isRedish(coords.getColor(Bloodweb.autopurchaseButton))
-        return buttonVisible && !Bloodweb.isLoading()
-    }
-    static isLoading() => isRedish(coords.getColor(Bloodweb.autopurchaseButtonLoading()))
-
-    static matchesHue(color, hueMin, hueMax) {
-        ; Inlined for perf since it's hot while identify marker tags.
-        ; Note the early returns in different places for HSV.
-        static inv255 := 1.0 / 255
-
-        ; ; Quick test for red <= 0x1F, green > 0x80
-        ; if (color & 0xe08000 != 0x008000)
-        ;     return false
-
-        r := (color >> 16) & 0xFF
-        g := (color >> 8) & 0xFF
-        b := color & 0xFF
-
-        maxVal := Max(r, g, b)
-
-        ; Calculate Value
-        if (maxVal <= 0.25 * 255)
-            return false
-
-        ; Calculate Saturation
-        minVal := Min(r, g, b)
-        delta := maxVal - minVal
-        if (delta = 0)
-            return false ; hue == 0
-
-        ; Saturation as [0..1]
-        s := (delta / maxVal)
-        if (s <= 0.5)
-            return false
-
-        ; Hue calculation (in degrees)
-        if (maxVal = r)
-            h := 60 * Mod(((g - b) / delta), 6)
-        else if (maxVal = g)
-            h := 60 * (((b - r) / delta) + 2)
-        else
-            h := 60 * (((r - g) / delta) + 4)
-
-        if (h < 0)
-            h += 360
-
-        ; Target hue is 165, but beige circle bg makes it as warm as 161
-        return h > hueMin and h < hueMax
-    }
-
-    static bloodwebErrorOkButtonRed := Coords2K(1915, 880)
-    static bloodwebErrorOkButtonBlack := Coords2K(1920, 880)
-    static bloodwebErrorOkButtonWhite := Coords2K(1886, 880)
-    static bloodwebErrorBarOutsideBloodwebRed := Coords2K(2166, 524)
-    static isBloodwebError() {
-        return isRedish(coords.getColor(Bloodweb.bloodwebErrorBarOutsideBloodwebRed)) and
-        isRedish(coords.getColor(Bloodweb.bloodwebErrorOkButtonRed)) and
-        isBlackish(coords.getColor(Bloodweb.bloodwebErrorOkButtonBlack), , tolerance := 16) and
-        isWhiteish(coords.getColor(Bloodweb.bloodwebErrorOkButtonWhite), , tolerance := 16)
-    }
-
-    class BloodwebNode {
-        __New(bottomLeft) {
-            this.bottomLeft := bottomLeft
-        }
-
-        /**
-         * @returns approximate center of the bloodweb node
-         */
-        center() {
-            offset := scaled.scaleX(30)
-            return this.bottomLeft.copy(this.bottomLeft.x + offset, this.bottomLeft.y - offset)
-        }
-
-        bottomRight => this.bottomLeft.copy(x := this.bottomLeft.x + Ceil(scaled.scaleX(65)))
-    }
 }
