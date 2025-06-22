@@ -83,7 +83,12 @@ autospend() {
             ; Cancel the bloodweb loading animation
             cycleBloodweb()
             while !waitUntilF(() => Bloodweb.isLoaded(), 4000) {
-                coords.click(bloodwebTab)
+                ; Bloodweb didn't load. Why?
+                if Bloodweb.isBloodwebError() {
+                    coords.click(Bloodweb.bloodwebErrorOkButtonRed)
+                } else {
+                    coords.click(bloodwebTab)
+                }
             }
             setPrevLevel(level)
         }
@@ -108,7 +113,7 @@ buyMarkedItems() {
     waitUntilF(() => Bloodweb.isLoaded(), 3000)
     Sleep(40) ; Sometimes the icons don't load for a couple frames.
 
-    s := Stopwatch("Buy marked items")
+    sw := Stopwatch("Buy marked items")
     /**
      * Overestimate of the number of nodes consumed.
      */
@@ -120,24 +125,24 @@ buyMarkedItems() {
     ; We'll use the same screenshot across the whole bloodweb level.
     ; Since we work from outside to inside, some inside nodes may get consumed early,
     ; but this is fine since we recheck for the marker (which will be missing) before clicking.
-    ss := bw.subscreenshot()
-    approxNodesConsumed += buyItemsAtPoints(bw.outerRing, 3, ss)
-    approxNodesConsumed += buyItemsAtPoints(bw.middleRing, 2, ss)
+    screenshot := bw.subscreenshot()
+    approxNodesConsumed += buyItemsAtPoints(bw.outerRing, 3, screenshot)
+    approxNodesConsumed += buyItemsAtPoints(bw.middleRing, 2, screenshot)
 
     ; Only do the inner ring if the entity can actually reach it.
     ; We always get 6 guaranteed nodes before the entity starts consuming.
     ; Inner ring has 6 nodes and entity has to consume 2 before hitting inner ring.
     if approxNodesConsumed > 2 {
-        buyItemsAtPoints(bw.innerRing, 1, ss)
+        buyItemsAtPoints(bw.innerRing, 1, screenshot)
     }
-    ss.dispose()
-    s.report()
+    screenshot.dispose()
+    sw.report()
 }
 
 /**
  * @returns number of nodes consumed
  */
-buyItemsAtPoints(points, depth, ss) {
+buyItemsAtPoints(points, depth, sceenshot) {
     approxNodesConsumed := 0
 
     for point in points {
@@ -149,11 +154,13 @@ buyItemsAtPoints(points, depth, ss) {
 
         isTeal(api) => Bloodweb.isTealMarker(api.getColor(node.bottomLeft))
         isBlue(api) => Bloodweb.isBlueMarker(api.getColor(node.bottomRight))
-        
-        if isTeal(ss) and isBlue(ss) {
+
+        if isTeal(sceenshot) and isBlue(sceenshot) {
+            ; Node was of interest at the time the screnshot was taken
+            waitUntilF(() => !Bloodweb.isLoading(), 3000)
             doWithRetriesUntilF(
                 action := () => slowClick(node.center(), 100),
-                predicate := () => !isTeal(coords) and !Bloodweb.isLoading(),
+                predicate := () => !isTeal(coords),
                 maxDurationMs := 5000,
                 timeBetweenRetries := 2000
             )

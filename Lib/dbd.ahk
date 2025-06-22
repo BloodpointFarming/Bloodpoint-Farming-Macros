@@ -357,6 +357,17 @@ class Bloodweb {
         return h > hueMin and h < hueMax
     }
 
+    static bloodwebErrorOkButtonRed := Coords2K(1915, 880)
+    static bloodwebErrorOkButtonBlack := Coords2K(1920, 880)
+    static bloodwebErrorOkButtonWhite := Coords2K(1886, 880)
+    static bloodwebErrorBarOutsideBloodwebRed := Coords2K(2166, 524)
+    static isBloodwebError() {
+        return isRedish(coords.getColor(Bloodweb.bloodwebErrorBarOutsideBloodwebRed)) and
+        isRedish(coords.getColor(Bloodweb.bloodwebErrorOkButtonRed)) and
+        isBlackish(coords.getColor(Bloodweb.bloodwebErrorOkButtonBlack), , tolerance := 16) and
+        isWhiteish(coords.getColor(Bloodweb.bloodwebErrorOkButtonWhite), , tolerance := 16)
+    }
+
     class BloodwebNode {
         __New(bottomLeft) {
             this.bottomLeft := bottomLeft
