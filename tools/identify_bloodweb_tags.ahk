@@ -2,7 +2,6 @@
 
 #Include ..\Lib\common.ahk
 #Include ..\Lib\Gdip_All.ahk
-#Include images.ahk
 ListLines(0) ; perf
 Persistent(0)
 pToken := Gdip_Startup()
@@ -45,7 +44,7 @@ findMarkers() {
             loop width {
                 x := xStart + A_Index - 1
                 rgb := img.getColor(x, y)
-                if isMarker(rgb) && !visited.Has(x "," y) {
+                if isTealMarker(rgb) && !visited.Has(x "," y) {
                     blob := floodFillMarker(img, x, y, visited)
                     if isBlobMarker(blob) {
                         bottomLeft := getBottomLeft(blob)
@@ -152,7 +151,7 @@ floodFillMarker(img, startX, startY, visited) {
         visited[key] := true
 
         rgb := img.getColor(x, y)
-        if !isMarker(rgb)
+        if !isTealMarker(rgb)
             continue
 
         blob.Push({ x: x, y: y })
@@ -189,7 +188,7 @@ distance(pt1, pt2) {
     return Sqrt(dx * dx + dy * dy)
 }
 
-isMarker(rgb) => Bloodweb.isMarker(rgb)
+isTealMarker(rgb) => Bloodweb.isTealMarker(rgb)
 
 isBlobMarker(blob) {
     if blob.Length < minBlobWidth * minBlobWidth

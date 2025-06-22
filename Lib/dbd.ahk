@@ -3,6 +3,7 @@
 #Include scaling.ahk
 #Include colors.ahk
 #Include coords.ahk
+#Include images.ahk
 
 isDbdFinishedLoading() {
     ; The text of the ESC button moves around at different resolutions.
@@ -195,9 +196,110 @@ class Bloodweb {
         this.all.Push(outerRing*)
         this.all.Push(middleRing*)
         this.all.Push(innerRing*)
+
+        ; Find the bounds for screenshotting later.
+        this.minX := 9999
+        this.minY := 9999
+        this.maxX := 0
+        this.maxY := 0
+        for point in this.all {
+            this.minX := Min(this.minX, point.x)
+            this.minY := Min(this.minY, point.y)
+            this.maxX := Max(this.maxX, point.x)
+            this.maxY := Max(this.maxY, point.y)
+        }
+        this.width := this.maxX - this.minX
+        this.height := this.maxY - this.minY
     }
 
-    static isMarker(color) => Bloodweb.matchesHue(color, 160, 168)
+    static fromHeight(height) {
+        if height = 1440
+            return Bloodweb(
+                outerRing := [
+                    ; Outer ring ordered from right to left to avoid issues with the tooltip
+                    Coords2K(396, 792), ; 9
+                    Coords2K(1356, 792), ; 3
+                    Coords2K(1289, 1024), ; 4
+                    Coords2K(1116, 1199), ; 5
+                    Coords2K(1291, 560), ; 2
+                    Coords2K(1116, 386), ; 1
+                    Coords2K(875, 1263), ; 6
+                    Coords2K(876, 322), ; 12
+                    Coords2K(635, 1199), ; 7
+                    Coords2K(636, 385), ; 11
+                    Coords2K(460, 560), ; 10
+                    Coords2K(461, 1024), ; 8
+                ],
+                middleRing := [
+                    Coords2K(554, 711), ; 9:30
+                    Coords2K(1198, 874), ; 3:30
+                    Coords2K(1114, 1022), ; 4:30
+                    Coords2K(958, 1104), ; 5:30
+                    Coords2K(1198, 711), ; 2:30
+                    Coords2K(1114, 563), ; 1:30
+                    Coords2K(793, 1105), ; 6:30
+                    Coords2K(958, 480), ; 12:30
+                    Coords2K(639, 1021), ; 7:30
+                    Coords2K(793, 480), ; 11:30
+                    Coords2K(638, 562), ; 10:30
+                    Coords2K(554, 874), ; 8:30
+                ],
+                innerRing := [
+                    Coords2K(1016, 875), ; 4
+                    Coords2K(1016, 710), ; 2
+                    Coords2K(875, 957), ; 6
+                    Coords2K(875, 630), ; 12
+                    Coords2K(736, 875), ; 8
+                    Coords2K(736, 710), ; 10
+                ]
+            )
+        else if height = 1080
+            return Bloodweb(
+                outerRing := [
+                    ; Outer ring ordered from right to left to avoid issues with the tooltip
+                    Coords1080(657, 942),
+                    Coords1080(837, 894),
+                    Coords1080(968, 763),
+                    Coords1080(477, 895),
+                    Coords1080(968, 415),
+                    Coords1080(837, 284),
+                    Coords1080(657, 236),
+                    Coords1080(346, 763),
+                    Coords1080(1017, 589),
+                    Coords1080(477, 284),
+                    Coords1080(346, 415),
+                    Coords1080(297, 589),
+                ],
+                middleRing := [
+                    Coords1080(719, 823),
+                    Coords1080(595, 823),
+                    Coords1080(835, 761),
+                    Coords1080(719, 355),
+                    Coords1080(898, 650),
+                    Coords1080(595, 355),
+                    Coords1080(479, 761),
+                    Coords1080(898, 528),
+                    Coords1080(835, 417),
+                    Coords1080(416, 650),
+                    Coords1080(479, 417),
+                    Coords1080(416, 528),
+                ],
+                innerRing := [
+                    Coords1080(762, 651),
+                    Coords1080(657, 712),
+                    Coords1080(762, 527),
+                    Coords1080(552, 651),
+                    Coords1080(657, 467),
+                    Coords1080(552, 527),
+                ]
+            )
+        else
+            return Bloodweb([], [], [])
+    }
+
+    subscreenshot() => Subscreenshot.of(this.minX, this.minY, this.width, this.height)
+
+    static isTealMarker(color) => Bloodweb.matchesHue(color, 160, 168)
 
     static isBlueMarker(color) => Bloodweb.matchesHue(color, 243, 253)
 
@@ -206,9 +308,9 @@ class Bloodweb {
 
     static isLoaded() {
         buttonVisible := isRedish(coords.getColor(Bloodweb.autopurchaseButton))
-        buttonLoading := isRedish(coords.getColor(Bloodweb.autopurchaseButtonLoading()))
-        return buttonVisible && !buttonLoading
+        return buttonVisible && !Bloodweb.isLoading()
     }
+    static isLoading() => isRedish(coords.getColor(Bloodweb.autopurchaseButtonLoading()))
 
     static matchesHue(color, hueMin, hueMax) {
         ; Inlined for perf since it's hot while identify marker tags.
@@ -254,11 +356,20 @@ class Bloodweb {
         ; Target hue is 165, but beige circle bg makes it as warm as 161
         return h > hueMin and h < hueMax
     }
-}
 
-arrayToString(arr) {
-    str := "["
-    for s in arr
-        str := str (A_Index = 1 ? "" : ", ") s
-    return str "]"
+    class BloodwebNode {
+        __New(bottomLeft) {
+            this.bottomLeft := bottomLeft
+        }
+
+        /**
+         * @returns approximate center of the bloodweb node
+         */
+        center() {
+            offset := scaled.scaleX(30)
+            return this.bottomLeft.copy(this.bottomLeft.x + offset, this.bottomLeft.y - offset)
+        }
+
+        bottomRight => this.bottomLeft.copy(x := this.bottomLeft.x + Ceil(scaled.scaleX(65)))
+    }
 }

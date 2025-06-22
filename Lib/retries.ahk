@@ -46,7 +46,7 @@ doWithRetriesUntilF(
         ; Checking instantly isn't enough time, but the action is often slow,
         ; so we don't want to repeat the action if we don't need to.
 
-        while A_TickCount - actionTime < timeBetweenRetries {
+        while A_TickCount - actionTime < timeBetweenRetries and A_TickCount - startTime < maxDurationMs {
             if predicate.Call() {
                 duration := A_TickCount - startTime
                 ; logger.info("predicate took " . (A_TickCount - startTime) . " ms.")

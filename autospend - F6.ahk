@@ -30,6 +30,22 @@ setEnabled(e) {
     global enabled
     enabled := e
 }
+
+disable() {
+    if !enabled
+        return
+    setEnabled(false)
+    logger.info("Stopped spending")
+    ToolTip()
+}
+
+ensureEnabled() {
+    ; Stop if the user tabs out
+    if !WinActive(dbdWinTitle)
+        disable()
+    return enabled
+}
+
 setPrevLevel(l) {
     global prevLevel
     prevLevel := l
@@ -50,30 +66,13 @@ startSpending() {
         Sleep(100)
     }
 
-    ; Initialize to the current level to avoid cycling again.
+    ; Initialize to the current level to avoid cycling unnecessarily.
     setPrevLevel(reliablyGetBloodwebLevel())
 
     coords.mouseMove(topLeft)
     apb := coords.scale(Bloodweb.autopurchaseButton)
     ToolTip("Autospending... (Alt+Tab to stop)", apb.x, apb.y)
     autospend()
-}
-
-disable() {
-    if !enabled
-        return
-    setEnabled(false)
-    logger.info("Stopped spending")
-    ToolTip()
-}
-
-isGuranteedLevel(level) => level >= 1 and level <= 11 and level != 10
-
-ensureEnabled() {
-    ; Stop if the user tabs out
-    if !WinActive(dbdWinTitle)
-        disable()
-    return enabled
 }
 
 autospend() {
@@ -87,15 +86,17 @@ autospend() {
             setPrevLevel(level)
         }
 
-        if !isGuranteedLevel(level) {
+        ; if !isGuranteedLevel(level) {
             if ensureEnabled()
                 buyMarkedItems()
-        }
+        ; }
 
         if ensureEnabled()
             slowClick(Bloodweb.autopurchaseButton)
     }
 }
+
+isGuranteedLevel(level) => level >= 1 and level <= 11 and level != 10
 
 buyMarkedItems() {
     ; Hide autopurchase tooltip
@@ -110,41 +111,47 @@ buyMarkedItems() {
      * Overestimate of the number of nodes consumed.
      */
     approxNodesConsumed := 0
-    approxNodesConsumed += buyItemsAtPoints(bw.outerRing, 3)
-    approxNodesConsumed += buyItemsAtPoints(bw.middleRing, 2)
+
+    ; PixelGetColor x30 nodes takes ~110 ms.
+    ; Direct memory access x30 nodes takes ~40ms.
+    ; Screenshot yields better performance when items of interest are sparse.
+    ; We'll use the same screenshot across the whole bloodweb level.
+    ; Since we work from outside to inside, some inside nodes may get consumed early,
+    ; but this is fine since we recheck for the marker (which will be missing) before clicking.
+    ss := bw.subscreenshot()
+    approxNodesConsumed += buyItemsAtPoints(bw.outerRing, 3, ss)
+    approxNodesConsumed += buyItemsAtPoints(bw.middleRing, 2, ss)
 
     ; Only do the inner ring if the entity can actually reach it.
     ; We always get 6 guaranteed nodes before the entity starts consuming.
     ; Inner ring has 6 nodes and entity has to consume 2 before hitting inner ring.
     if approxNodesConsumed > 2 {
-        buyItemsAtPoints(bw.innerRing, 1)
+        buyItemsAtPoints(bw.innerRing, 1, ss)
     }
+    ss.dispose()
     s.report()
 }
 
 /**
- * @reutrns number of nodes consumed
+ * @returns number of nodes consumed
  */
-buyItemsAtPoints(points, depth) {
+buyItemsAtPoints(points, depth, ss) {
     approxNodesConsumed := 0
-    offset := scaled.scaleX(30)
 
     for point in points {
         ensureEnabled()
         if !enabled
             return 0
 
-        local tealMarker := point ; scoping issue workaround
+        local node := Bloodweb.BloodwebNode(point)
 
-        isMarked() {
-            blueMarker := tealMarker.copy(x := tealMarker.x + Ceil(scaled.scaleX(65)))
-            return Bloodweb.isMarker(coords.getColor(tealMarker)) and
-            Bloodweb.isBlueMarker(coords.getColor(blueMarker))
-        }
-        if isMarked() {
+        isTeal(api) => Bloodweb.isTealMarker(api.getColor(node.bottomLeft))
+        isBlue(api) => Bloodweb.isBlueMarker(api.getColor(node.bottomRight))
+        
+        if isTeal(ss) and isBlue(ss) {
             doWithRetriesUntilF(
-                action := () => slowClick(tealMarker.copy(tealMarker.x + offset, tealMarker.y - offset), 100),
-                predicate := () => !isMarked(),
+                action := () => slowClick(node.center(), 100),
+                predicate := () => !isTeal(coords) and !Bloodweb.isLoading(),
                 maxDurationMs := 5000,
                 timeBetweenRetries := 2000
             )
@@ -156,90 +163,10 @@ buyItemsAtPoints(points, depth) {
 
 setBloodwebSize() {
     global bw
-    if dbdWindow.height = 1440
-        bw := Bloodweb(
-            outerRing := [
-                ; Outer ring ordered from right to left to avoid issues with the tooltip
-                Coords2K(396, 792), ; 9
-                Coords2K(1356, 792), ; 3
-                Coords2K(1289, 1024), ; 4
-                Coords2K(1116, 1199), ; 5
-                Coords2K(1291, 560), ; 2
-                Coords2K(1116, 386), ; 1
-                Coords2K(875, 1263), ; 6
-                Coords2K(876, 322), ; 12
-                Coords2K(635, 1199), ; 7
-                Coords2K(636, 385), ; 11
-                Coords2K(460, 560), ; 10
-                Coords2K(461, 1024), ; 8
-            ],
-            middleRing := [
-                Coords2K(554, 711), ; 9:30
-                Coords2K(1198, 874), ; 3:30
-                Coords2K(1114, 1022), ; 4:30
-                Coords2K(958, 1104), ; 5:30
-                Coords2K(1198, 711), ; 2:30
-                Coords2K(1114, 563), ; 1:30
-                Coords2K(793, 1105), ; 6:30
-                Coords2K(958, 480), ; 12:30
-                Coords2K(639, 1021), ; 7:30
-                Coords2K(793, 480), ; 11:30
-                Coords2K(638, 562), ; 10:30
-                Coords2K(554, 874), ; 8:30
-            ],
-            innerRing := [
-                Coords2K(1016, 875), ; 4
-                Coords2K(1016, 710), ; 2
-                Coords2K(875, 957), ; 6
-                Coords2K(875, 630), ; 12
-                Coords2K(736, 875), ; 8
-                Coords2K(736, 710), ; 10
-            ]
-        )
-    else if dbdWindow.height = 1080
-        bw := Bloodweb(
-            outerRing := [
-                ; Outer ring ordered from right to left to avoid issues with the tooltip
-                Coords1080(657, 942),
-                Coords1080(837, 894),
-                Coords1080(968, 763),
-                Coords1080(477, 895),
-                Coords1080(968, 415),
-                Coords1080(837, 284),
-                Coords1080(657, 236),
-                Coords1080(346, 763),
-                Coords1080(1017, 589),
-                Coords1080(477, 284),
-                Coords1080(346, 415),
-                Coords1080(297, 589),
-            ],
-            middleRing := [
-                Coords1080(719, 823),
-                Coords1080(595, 823),
-                Coords1080(835, 761),
-                Coords1080(719, 355),
-                Coords1080(898, 650),
-                Coords1080(595, 355),
-                Coords1080(479, 761),
-                Coords1080(898, 528),
-                Coords1080(835, 417),
-                Coords1080(416, 650),
-                Coords1080(479, 417),
-                Coords1080(416, 528),
-            ],
-            innerRing := [
-                Coords1080(762, 651),
-                Coords1080(657, 712),
-                Coords1080(762, 527),
-                Coords1080(552, 651),
-                Coords1080(657, 467),
-                Coords1080(552, 527),
-            ]
-        )
-    else {
+    bw := Bloodweb.fromHeight(dbdWindow.height)
+    if !bw.all.Length {
         MsgBox("Autospend only supports 1080p and 1440p. Run windowed if you need to.")
         disable()
-        bw := Bloodweb([], [], [])
     }
 }
 

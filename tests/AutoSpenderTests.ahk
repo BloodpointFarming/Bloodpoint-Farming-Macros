@@ -27,7 +27,7 @@ class AutoSpenderTests {
     ;     assertMarkers(points) {
     ;         for point in points {
     ;             c := coords.getColor(point)
-    ;             Yunit.Assert(Bloodweb.isMarker(c), "color=" Format("{:06X}", c) " coords=(" point.x ", " point.y ")")
+    ;             Yunit.Assert(Bloodweb.isTealMarker(c), "color=" Format("{:06X}", c) " coords=(" point.x ", " point.y ")")
     ;         }
     ;         return true
     ;     }
@@ -37,9 +37,9 @@ class AutoSpenderTests {
     test_isLoaded_yes_1080() => assertFor("bloodweb\1080\loaded.png", () => Bloodweb.isLoaded())
     test_isLoaded_no_1080() => assertFor("bloodweb\1080\loading.png", () => !Bloodweb.isLoaded())
 
-    test_isMarker() {
+    test_isTealMarker() {
         for c in ["169679", "0b8b6c", "09896a", "008b69"]
-            Yunit.Assert(Bloodweb.isMarker(Integer("0x" c)), "0x" c)
+            Yunit.Assert(Bloodweb.isTealMarker(Integer("0x" c)), "0x" c)
 
         for c in [
             "000000", "ffffff",
@@ -47,7 +47,7 @@ class AutoSpenderTests {
             "0000ff", "ff0000", "00ff00"
             "7d8986", "021712",
         ]
-            Yunit.Assert(!Bloodweb.isMarker(Integer("0x" c)), c)
+            Yunit.Assert(!Bloodweb.isTealMarker(Integer("0x" c)), c)
     }
 
 }
