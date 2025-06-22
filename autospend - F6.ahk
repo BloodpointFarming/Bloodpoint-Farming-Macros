@@ -9,7 +9,7 @@ https://www.reddit.com/r/deadbydaylight/s/njguTZBODp
 
 setTrayIcon("icons/autopurchase.ico")
 
-debug := true
+debug := false
 bw := Bloodweb([], [], [])
 
 ; Start spending
