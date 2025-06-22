@@ -80,16 +80,18 @@ autospend() {
         level := reliablyGetBloodwebLevel()
 
         if (level > 0 && prevLevel != level) {
-            ; Load instantly.
+            ; Cancel the bloodweb loading animation
             cycleBloodweb()
-            Sleep(100) ; This needs to be here, but should be replaced with condition checking
+            while !waitUntilF(() => Bloodweb.isLoaded(), 4000) {
+                coords.click(bloodwebTab)
+            }
             setPrevLevel(level)
         }
 
-        ; if !isGuranteedLevel(level) {
+        if !isGuranteedLevel(level) {
             if ensureEnabled()
                 buyMarkedItems()
-        ; }
+        }
 
         if ensureEnabled()
             slowClick(Bloodweb.autopurchaseButton)
