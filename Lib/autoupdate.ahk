@@ -18,7 +18,46 @@ class AutoUpdate {
     }
 
     UpdateIfNewVersion() {
-        ;    Removed temporarily
+        try {
+            if this.isGitRepo() {
+                logger.info("Running from git repo. Skipping auto-update. Use git pull instead.")
+                return
+            }
+
+            if !this.isUpdateTime() {
+                logger.info("Already checked for update recently. Skipping update check.")
+                return
+            }
+
+            ; Mark that we checked for an update so we don't retry for a while
+            FileOverwite(A_Now, this.lastUpdateCheckFile)
+
+            newEtag := this.getLatestEtag()
+            currentEtag := this.getCurrentEtag()
+            logger.info("currentEtag=" currentEtag " newEtag=" newEtag)
+            if newEtag = currentEtag {
+                logger.info("No update needed.")
+                return
+            }
+
+            if !this.doesUserAgreeToUpdate() {
+                logger.info("Update available, but user declined update.")
+                return
+            }
+
+            this.installLatestUpdate()
+
+            ; Record the new ETag
+            FileOverwite(newEtag, this.etagFile)
+
+            logger.debug("Update complete.")
+
+            this.reportSuccess()
+        } catch Error as e {
+            msg := "Error during update on " e.File ":" e.Line " " e.Message "`n" e.Stack
+            logger.error(msg)
+            this.MsgBox("Update failed on line " e.Line ". Giving up for now. Won't try again for at least 12 hours.", "Update Failed", 0x10)
+        }
     }
 
     isGitRepo() => FileExist(this.installDir "\.git")
