@@ -256,7 +256,7 @@ cycleBloodweb() {
     ; Closing and opening the bloodweb skips the "level" interstitial
     logger.info("Cycling bloodweb")
     coords.click(bloodwebTab) ; bloodweb tab
-    Sleep(50)
+    Sleep(100)
     coords.click(bloodwebTab) ; bloodweb tab
 }
 

@@ -38,48 +38,6 @@ colorToHSL(color) {
     return RGBtoHSL(r, g, b)
 }
 
-RGBtoHSV(r, g, b) {
-    ; Normalize RGB values to [0,1]
-    r := r / 255
-    g := g / 255
-    b := b / 255
-
-    maxVal := Max(r, g, b)
-    minVal := Min(r, g, b)
-    delta := maxVal - minVal
-
-    ; Hue calculation
-    if (delta = 0)
-        h := 0
-    else if (maxVal = r)
-        h := Mod(((g - b) / delta), 6)
-    else if (maxVal = g)
-        h := ((b - r) / delta) + 2
-    else ; max = b
-        h := ((r - g) / delta) + 4
-
-    h := Round(h * 60)
-    if (h < 0)
-        h += 360
-
-    ; Saturation calculation
-    s := (maxVal = 0) ? 0 : (delta / maxVal)
-    v := maxVal
-
-    ; Convert s and v to percent
-    s := Round(s * 100)
-    v := Round(v * 100)
-
-    return [h, s, v]
-}
-
-colorToHSV(color) {
-    r := (color >> 16) & 0xFF
-    g := (color >> 8) & 0xFF
-    b := color & 0xFF
-    return RGBtoHSV(r, g, b)
-}
-
 isWhiteish(color, threshold := 0xD0, tolerance := 5) {
     ; Most reshade filters leave near-pure-white pixels as near-pure-white.
     r := (color >> 16) & 0xFF
