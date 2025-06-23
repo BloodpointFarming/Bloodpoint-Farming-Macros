@@ -33,7 +33,7 @@ class AutoSpenderTests {
             }
             return true
         }
-        assertFor("bloodweb\bloodweb_full_1440.png", assertMarkers.Bind(Bloodweb.fromHeight(1440).all))
+        assertFor("bloodweb\bloodweb_full_1440.png", () => assertMarkers.Bind(Bloodweb.fromHeight(1440).all))
     }
 
     test_isMarked() => assertFor("bloodweb\1440\laurie.png", () => countBloodwebItems() = 3)
