@@ -9,7 +9,17 @@ https://www.reddit.com/r/deadbydaylight/s/njguTZBODp
 
 setTrayIcon("icons/autopurchase.ico")
 
+/**
+ * Enables additional info and screnshot capturing.
+ */
 debug := false
+
+/**
+ * Autopurchase when there are no more nodes of interest that require claiming.
+ * Can be disabled for debugging to test individual node claiming.
+ */
+useAutopurchase := true
+
 bw := Bloodweb([], [], [])
 
 ; Start spending
@@ -22,7 +32,8 @@ bw := Bloodweb([], [], [])
 
 ~^+F6:: {
     ; Debug stub to check level-detection without actually spending
-    getBloodwebLevel()
+    setEnabled(true)
+    showUnmarkedNodes()
 }
 
 prevLevel := -1
@@ -103,25 +114,31 @@ autospend() {
             }
         }
 
-        if !isGuranteedLevel(level) {
+        if !useAutopurchase or !isGuranteedLevel(level) {
             if ensureEnabled()
                 buyMarkedItems()
         }
 
-        clickAutopurchase()
-        ; Retry until something happens.
-        doWithRetriesUntilF(
-            action := clickAutopurchase,
-            predicate := hasLevelChanged or !ensureEnabled,
-            maxDurationMs := 10000,
-            timeBetweenRetries := 500
-        )
+        if useAutopurchase {
+            clickAutopurchase()
+            ; Retry until something happens.
+            doWithRetriesUntilF(
+                action := clickAutopurchase,
+                predicate := () => hasLevelChanged() or !ensureEnabled(),
+                maxDurationMs := 10000,
+                timeBetweenRetries := 500
+            )
+        }
     }
 }
 
 clickAutopurchase() {
-    logger.info("Clicking autopurchase.")
-    slowClick(Bloodweb.autopurchaseButton)
+    if useAutopurchase {
+        logger.info("Clicking autopurchase.")
+        slowClick(Bloodweb.autopurchaseButton)
+    } else {
+        logger.info("Suppressed: Clicking autopurchase.")
+    }
 }
 
 hasLevelChanged() => getBloodwebLevel() != prevLevel
@@ -156,7 +173,7 @@ buyMarkedItems() {
     ; Only do the inner ring if the entity can actually reach it.
     ; We always get 6 guaranteed nodes before the entity starts consuming.
     ; Inner ring has 6 nodes and entity has to consume 2 before hitting inner ring.
-    if approxNodesConsumed > 2 {
+    if approxNodesConsumed > 2 or !useAutopurchase {
         buyItemsAtPoints(bw.innerRing, 1, screenshot)
     }
     saveScreenshot(screenshot)
@@ -178,7 +195,7 @@ saveScreenshot(screenshot) {
 /**
  * @returns number of nodes consumed
  */
-buyItemsAtPoints(points, depth, sceenshot) {
+buyItemsAtPoints(points, depth, screenshot) {
     approxNodesConsumed := 0
 
     for point in points {
@@ -187,15 +204,12 @@ buyItemsAtPoints(points, depth, sceenshot) {
 
         local node := point
 
-        isTeal(api) => Bloodweb.isTealMarker(api.getColor(node.bottomLeft))
-        isBlue(api) => Bloodweb.isBlueMarker(api.getColor(node.bottomRight))
-
-        if isTeal(sceenshot) and isBlue(sceenshot) {
+        if node.isTeal(screenshot) and node.isBlue(screenshot) {
             ; Node was of interest at the time the screnshot was taken
             waitUntilF(() => !Bloodweb.isLoading(), 3000)
             doWithRetriesUntilF(
                 action := () => clickNode(node),
-                predicate := () => !isTeal(coords) or !enabled,
+                predicate := () => !node.isTeal(coords) or !enabled,
                 maxDurationMs := 5000,
                 timeBetweenRetries := 2000
             )
@@ -203,6 +217,30 @@ buyItemsAtPoints(points, depth, sceenshot) {
         }
     }
     return approxNodesConsumed
+}
+
+/**
+ * Debugging tool
+ */
+showUnmarkedNodes() {
+    setBloodwebSize()
+    screenshot := bw.subscreenshot()
+
+    for node in bw.all {
+        if !ensureEnabled()
+            return
+
+        t := node.isTeal(screenshot)
+        b := node.isBlue(screenshot)
+        isMarked := t and b
+        if !isMarked {
+            msg := isMarked ? "Marked" : "NOT Marked (teal=" t " blue=" b ")"
+            ToolTip(msg, node.center.x, node.center.y)
+            Sleep(isMarked ? 500 : 1000)
+        }
+    }
+
+    disable()
 }
 
 setBloodwebSize() {

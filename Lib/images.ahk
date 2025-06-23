@@ -86,7 +86,16 @@ class Subscreenshot {
      * Gets the color using coordinates relative to the whole DBD window at some arbitrary scale.
      * The coords will be rescaled to the active window.
      */
-    getColor(point) => this.getColorLiteral(point.scaledX(), point.scaledY())
+    getColor(point) {
+        scaledX := point.scaledX()
+        scaledY := point.scaledY()
+
+        color := this.getColorLiteral(scaledX, scaledY)
+
+        logger.trace("getColor(" point.x ", " point.y ") => (" scaledX ", " scaledY ")=" Format("{:06X}", color))
+
+        return color
+    }
 
     dispose() => this.img.dispose()
 }

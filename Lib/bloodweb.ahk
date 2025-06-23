@@ -56,7 +56,7 @@ class Bloodweb {
                     Bloodweb.Node(958, 1104), ; 5:30
                     Bloodweb.Node(1198, 711), ; 2:30
                     Bloodweb.Node(1114, 563), ; 1:30
-                    Bloodweb.Node(793, 1105), ; 6:30
+                    Bloodweb.Node(793, 1104), ; 6:30
                     Bloodweb.Node(958, 480), ; 12:30
                     Bloodweb.Node(639, 1021), ; 7:30
                     Bloodweb.Node(793, 480), ; 11:30
@@ -66,7 +66,7 @@ class Bloodweb {
                 innerRing := [
                     Bloodweb.Node(1016, 875), ; 4
                     Bloodweb.Node(1016, 710), ; 2
-                    Bloodweb.Node(875, 957), ; 6
+                    Bloodweb.Node(875, 956), ; 6
                     Bloodweb.Node(875, 630), ; 12
                     Bloodweb.Node(736, 875), ; 8
                     Bloodweb.Node(736, 710), ; 10
@@ -120,9 +120,9 @@ class Bloodweb {
 
     subscreenshot() => Subscreenshot.of(this.minX, this.minY, this.width, this.height)
 
-    static isTealMarker(color) => Bloodweb.matchesHue(color, 160, 168)
+    static isTealMarker(color) => Bloodweb.matchesHue(color, 160, 171)
 
-    static isBlueMarker(color) => Bloodweb.matchesHue(color, 243, 253)
+    static isBlueMarker(color) => Bloodweb.matchesHue(color, 239, 255)
 
     static autopurchaseButton := Coords2K(910, 755)
     static autopurchaseButtonLoading() => dbdWindow.height = 1080 ? Coords1080(700, 596) : Coords2K(933, 800)
@@ -198,5 +198,8 @@ class Bloodweb {
         }
 
         bottomRight => this.bottomLeft.copy(x := this.bottomLeft.x + Ceil(scaled.scaleX(65)))
+
+        isTeal(api) => Bloodweb.isTealMarker(api.getColor(this.bottomLeft))
+        isBlue(api) => Bloodweb.isBlueMarker(api.getColor(this.bottomRight))
     }
 }
