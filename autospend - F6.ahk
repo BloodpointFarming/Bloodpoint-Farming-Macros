@@ -100,7 +100,7 @@ autospend() {
         }
 
         ; Wait for the bloodweb to load.
-        while !waitUntilF(() => Bloodweb.isLoaded(), 10000) {
+        while !waitUntilF(() => Bloodweb.isLoaded() or !ensureEnabled(), 10000) {
             ; Bloodweb didn't load. Why?
             if !ensureEnabled()
                 return
