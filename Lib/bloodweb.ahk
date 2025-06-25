@@ -124,6 +124,30 @@ class Bloodweb {
 
     static isBlueMarker(color) => Bloodweb.matchesHue(color, 239, 255)
 
+    static markerPriority(color) {
+        ; Hues:
+        ; pink: 344
+        ; purple: 287
+        ; blue: 215
+        ; green: 125
+        ; brown: 25
+
+        hsv := colorToHSV(color)
+        s := hsv[2]
+        if s <= 5
+            return 5 ; pink
+        else if s <= 75
+            return 1 ; brown
+        else if s <= 170
+            return 2 ; green
+        else if s <= 251
+            return 3 ; blue
+        else if s <= 316
+            return 4 ; purple
+        else
+            return 5 ; pink
+    }
+
     static autopurchaseButton := Coords2K(910, 755)
     static autopurchaseButtonLoading() => dbdWindow.height = 1080 ? Coords1080(700, 596) : Coords2K(933, 800)
 
@@ -136,12 +160,6 @@ class Bloodweb {
     static matchesHue(color, hueMin, hueMax) {
         ; Inlined for perf since it's hot while identify marker tags.
         ; Note the early returns in different places for HSV.
-        static inv255 := 1.0 / 255
-
-        ; ; Quick test for red <= 0x1F, green > 0x80
-        ; if (color & 0xe08000 != 0x008000)
-        ;     return false
-
         r := (color >> 16) & 0xFF
         g := (color >> 8) & 0xFF
         b := color & 0xFF
@@ -195,6 +213,7 @@ class Bloodweb {
 
             offset := scaled.scaleX(30)
             this.center := this.bottomLeft.copy(this.bottomLeft.x + offset, this.bottomLeft.y - offset)
+            this.topLeft := this.bottomLeft.copy(, this.bottomLeft.y + offset)
         }
 
         bottomRight => this.bottomLeft.copy(x := this.bottomLeft.x + Ceil(scaled.scaleX(65)))

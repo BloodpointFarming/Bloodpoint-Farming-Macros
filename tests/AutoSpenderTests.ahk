@@ -33,7 +33,27 @@ class AutoSpenderTests {
             }
             return true
         }
-        assertFor("bloodweb\bloodweb_full_1440.png", () => assertMarkers.Bind(Bloodweb.fromHeight(1440).all))
+        assertFor("bloodweb\bloodweb_full_1440.png", () => assertMarkers(Bloodweb.fromHeight(1440).all))
+    }
+
+    test_getBloodweb_pink() {
+        assertMarkers() {
+            nodes := Bloodweb.fromHeight(1440).all
+            count := 0
+            for node in nodes {
+                teal := node.bottomLeft
+                if Bloodweb.isTealMarker(coords.getColor(node.bottomLeft)) and Bloodweb.isBlueMarker(coords.getColor(node.bottomRight)) {
+                    count += 1
+                    c := node.topLeft
+                    color := coords.getColor(node.topLeft)
+                    p := Bloodweb.markerPriority(color)
+                    Yunit.Assert(p = 5, "color=" Format("{:06X}", color) " coords=(" c.x ", " c.y ")")
+                }
+            }
+            Yunit.Assert(count >= 26)
+            return true
+        }
+        assertFor("bloodweb\1440\nodes-pink.png", () => assertMarkers())
     }
 
     test_isMarked() => assertFor("bloodweb\1440\laurie.png", () => countBloodwebItems() = 3)
