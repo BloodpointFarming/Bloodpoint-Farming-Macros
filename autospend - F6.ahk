@@ -120,29 +120,33 @@ autospend() {
             }
         }
 
+        ; If we resume at low levels, bulk spend.
         if useBulkSpend and level > 0 and level < bulkSpendToLevel {
             bulkSpend()
-        } else {
-            if !useAutopurchase or !isGuranteedLevel(level) {
-                if ensureEnabled()
-                    buyMarkedItems()
-            }
+            continue
         }
 
+        ; Buy specific items
+        if !useAutopurchase or !isGuranteedLevel(level) {
+            if ensureEnabled()
+                buyMarkedItems()
+        }
+
+        ; Bulk spend at level 50 after picking out the things we want. Skip the prestige interstitial.
         if level = 50 and useBulkSpend {
             bulkSpend()
-        } else {
-            if useAutopurchase {
-                clickAutopurchase()
-                ; Retry until something happens.
-                doWithRetriesUntilF(
-                    action := clickAutopurchase,
-                    predicate := () => hasLevelChanged() or !ensureEnabled(),
-                    maxDurationMs := 10000,
-                    timeBetweenRetries := 500
-                )
-            }
+            continue
         }
+
+        ; Autopurchase untagged items.
+        clickAutopurchase()
+        ; Retry until something happens.
+        doWithRetriesUntilF(
+            action := clickAutopurchase,
+            predicate := () => hasLevelChanged() or !ensureEnabled() or !useAutopurchase,
+            maxDurationMs := 10000,
+            timeBetweenRetries := 500
+        )
     }
 }
 
