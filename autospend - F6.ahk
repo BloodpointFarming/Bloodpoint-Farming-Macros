@@ -20,6 +20,12 @@ debug := false
  */
 useAutopurchase := true
 
+/**
+ * Uses the bulk spend between level 50 and 10.
+ */
+useBulkSpend := true
+bulkSpendToLevel := 14
+
 bw := Bloodweb([], [], [])
 
 ; Start spending
@@ -114,22 +120,49 @@ autospend() {
             }
         }
 
-        if !useAutopurchase or !isGuranteedLevel(level) {
-            if ensureEnabled()
-                buyMarkedItems()
+        if useBulkSpend and level > 0 and level < bulkSpendToLevel {
+            bulkSpend()
+        } else {
+            if !useAutopurchase or !isGuranteedLevel(level) {
+                if ensureEnabled()
+                    buyMarkedItems()
+            }
         }
 
-        if useAutopurchase {
-            clickAutopurchase()
-            ; Retry until something happens.
-            doWithRetriesUntilF(
-                action := clickAutopurchase,
-                predicate := () => hasLevelChanged() or !ensureEnabled(),
-                maxDurationMs := 10000,
-                timeBetweenRetries := 500
-            )
+        if level = 50 and useBulkSpend {
+            bulkSpend()
+        } else {
+            if useAutopurchase {
+                clickAutopurchase()
+                ; Retry until something happens.
+                doWithRetriesUntilF(
+                    action := clickAutopurchase,
+                    predicate := () => hasLevelChanged() or !ensureEnabled(),
+                    maxDurationMs := 10000,
+                    timeBetweenRetries := 500
+                )
+            }
         }
     }
+}
+
+bulkSpend() {
+    logger.info("Bulk spending to level " bulkSpendToLevel)
+    waitUntilF(() => Bloodweb.isBulkSpendVisible())
+    coords.click(Bloodweb.bulkSpendButton)
+
+    Sleep(100) ; it loads fast. probably overkill.
+
+    levels := bulkSpendToLevel - Mod(prevLevel, 50) - 1
+    loop levels {
+        coords.click(Bloodweb.bulkSpendLevelPlusButton)
+        Sleep(20)
+    }
+
+    coords.click(Bloodweb.bulkSpendLevelConfirmButton)
+
+    waitUntilF(() => Bloodweb.isBulkSpendOkVisible(), 5000)
+    slowClick(Bloodweb.bulkSpendOkButtonRed)
 }
 
 clickAutopurchase() {
