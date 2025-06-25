@@ -210,7 +210,13 @@ class Bloodweb {
         return s < 0.1
     }
     static bulkSpendLevelPlusButton := Coords2K(1520, 654)
-    static bulkSpendLevelConfirmButton := Coords2K(2010, 1111)
+    static bulkSpendConfirmButton := Coords2K(2010, 1111)
+    static isBulkSpendConfirmButtonVisible() {
+        ; This is very indirect, but we're looking for the pure black region above the button.
+        button := Bloodweb.bulkSpendConfirmButton
+        aboveBlack := coords.getColor(button.copy(, button.y - scaled.scaleY(60)))
+        return (aboveBlack & 0xFFFFFF) = 0
+    }
     static bulkSpendOkButtonRed := Coords2K(2021, 1120)
     static isBulkSpendOkVisible() => isRedish(coords.getColor(Bloodweb.bulkSpendOkButtonRed))
 }

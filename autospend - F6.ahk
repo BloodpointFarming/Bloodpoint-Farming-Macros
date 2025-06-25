@@ -24,7 +24,7 @@ useAutopurchase := true
  * Uses the bulk spend between level 50 and 10.
  */
 useBulkSpend := true
-bulkSpendToLevel := 14
+bulkSpendToLevel := 10
 
 bw := Bloodweb([], [], [])
 
@@ -148,21 +148,37 @@ autospend() {
 
 bulkSpend() {
     logger.info("Bulk spending to level " bulkSpendToLevel)
+
+    ; Open bulk dialog
     waitUntilF(() => Bloodweb.isBulkSpendVisible())
     coords.click(Bloodweb.bulkSpendButton)
 
     Sleep(100) ; it loads fast. probably overkill.
 
+    ; Set levels
     levels := bulkSpendToLevel - Mod(prevLevel, 50) - 1
     loop levels {
         coords.click(Bloodweb.bulkSpendLevelPlusButton)
         Sleep(20)
     }
 
-    coords.click(Bloodweb.bulkSpendLevelConfirmButton)
+    ; Confirm purchase (this button doesn't register clicks reliably, so we must spam)
+    doWithRetriesUntilF(
+        action := () => slowClick(Bloodweb.bulkSpendConfirmButton, 100),
+        predicate := () => !Bloodweb.isBulkSpendConfirmButtonVisible(),
+        maxDurationMs := 2000,
+        timeBetweenRetries := 200
+    )
+    ops.mouseMove(0, 0) ; don't depend on red hover glow for next step. user may move mouse.
 
+    ; Done
     waitUntilF(() => Bloodweb.isBulkSpendOkVisible(), 5000)
-    slowClick(Bloodweb.bulkSpendOkButtonRed)
+    doWithRetriesUntilF(
+        action := () => slowClick(Bloodweb.bulkSpendOkButtonRed, 100),
+        predicate := () => !Bloodweb.isBulkSpendOkVisible(),
+        maxDurationMs := 1000,
+        timeBetweenRetries := 200
+    )
 }
 
 clickAutopurchase() {
