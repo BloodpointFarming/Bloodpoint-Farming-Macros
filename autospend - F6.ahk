@@ -107,7 +107,7 @@ autospend() {
         level := getBloodwebLevel()
         logger.info("Level " level)
 
-        if (level > 0 && prevLevel != level) {
+        if (level > 0 && prevLevel != level or Bloodweb.isP100) {
             ; Cancel the bloodweb loading animation
             cycleBloodweb()
             setPrevLevel(level)
@@ -146,16 +146,55 @@ autospend() {
             continue
         }
 
-        ; Autopurchase untagged items.
-        clickAutopurchase()
-        ; Retry until something happens.
-        doWithRetriesUntilF(
-            action := clickAutopurchase,
-            predicate := () => hasLevelChanged() or !shouldKeepRunning() or !useAutopurchase,
-            maxDurationMs := 10000,
-            timeBetweenRetries := 500
-        )
+        if useAutopurchase {
+            ; Autopurchase untagged items.
+            autoPurchase()
+        }
     }
+}
+
+autoPurchase() {
+    ; Left of the button to avoid tooltip.
+    apbLeftRed := dbdWindow.height = 1440 ? Coords2K(884, 756) : Coords1080(663, 563)
+    isP100 := Bloodweb.isP100()
+    logger.info("isP100=" isP100)
+    
+    hasRedDisappeared := false
+    isAutoPurchaseComplete() {
+        if !shouldKeepRunning()
+            return true
+
+        if isP100 {
+            ; We can't rely on the level changing. It stays 50 forever.
+            ; For lack of anything better, we're going to watch for the red button
+            ; to disappear and reappear. This is suboptimal, but I'm out of time to
+            ; think of something better.
+            color := coords.getColor(apbLeftRed)
+            hsv := colorToHSV(color)
+            h := hsv[1]
+            s := hsv[2]
+            redishNow := (h > 350 or h < 15) and s > 0.5 ; isRedish() can't handle red this dark.
+
+            if !hasRedDisappeared and !redishNow {
+                logger.debug("No longer redish: " Format("{:06X}", color))
+                hasRedDisappeared := true
+            }
+
+            redReturned := hasRedDisappeared and redishNow
+            return redReturned
+        } else {
+            return hasLevelChanged()
+        }
+    }
+
+    clickAutopurchase()
+    ; Retry until something happens.
+    doWithRetriesUntilF(
+        action := clickAutopurchase,
+        predicate := isAutoPurchaseComplete,
+        maxDurationMs := 10000,
+        timeBetweenRetries := 500
+    )
 }
 
 bulkSpend() {

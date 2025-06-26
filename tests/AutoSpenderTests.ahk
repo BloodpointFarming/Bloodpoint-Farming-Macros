@@ -22,7 +22,7 @@ class AutoSpenderTests {
     }
 
     test_getBloodwebLevel_Level49_1440() => assertFor("bloodweb\bloodweb_1440_level32.png", () => getBloodwebLevel() == 32)
-    test_getBloodwebLevel_Level21_1080() => assertFor("bloodweb\bloodweb_1080_level20.png", () => getBloodwebLevel() == 20)
+    test_getBloodwebLevel_Level20_1080() => assertFor("bloodweb\bloodweb_1080_level20.png", () => getBloodwebLevel() == 20)
 
     test_getBloodwebFull() {
         assertMarkers(nodes) {
@@ -120,6 +120,7 @@ class AutoSpenderTests {
 
     test_isP100_Yes() => assertFor("bloodweb\bloodweb_full_1440.png", () => Bloodweb.isP100())
     test_isP100_No() => assertFor("bloodweb\1440\quentin.png", () => !Bloodweb.isP100())
+    test_isP100_1080_Yes() => assertFor("bloodweb\1080\p100.png", () => Bloodweb.isP100())
 }
 
 assertBloodwebLevel(expectedLevel, screenshotPath) {
