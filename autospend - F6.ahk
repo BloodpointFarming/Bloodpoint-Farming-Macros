@@ -89,14 +89,16 @@ startSpending() {
     if (level = -1) {
         ; Bloodweb is not visible. Open it.
         coords.click(bloodwebTab)
+
+        ; Then cycle it to make the contents load instantly.
         Sleep(100)
+        cycleBloodweb()
     }
 
     ; Initialize to the current level to avoid cycling unnecessarily.
     setPrevLevel(getBloodwebLevel())
 
     coords.mouseMove(topLeft)
-    apb := coords.scale(Bloodweb.autopurchaseButton)
     autospend()
 }
 
@@ -226,15 +228,32 @@ buyMarkedItems() {
     ; Since we work from outside to inside, some inside nodes may get consumed early,
     ; but this is fine since we recheck for the marker (which will be missing) before clicking.
     screenshot := bw.subscreenshot()
-    approxNodesConsumed += buyItemsAtPoints(bw.outerRing, 3, screenshot)
-    approxNodesConsumed += buyItemsAtPoints(bw.middleRing, 2, screenshot)
+
+    ; Determine priority of each tagged node.
+    queue := Map()
+    for node in bw.all {
+        if node.isTeal(screenshot) and node.isBlue(screenshot) {
+            color := screenshot.getColor(node.topLeft)
+            pri := Bloodweb.markerPriority(color)
+            if !queue.Has(pri)
+                queue[pri] := []
+
+            arr := queue[pri].Push(node)
+        }
+    }
+
+    for pri, nodes in queue {
+        logger.info("Priority " pri ": " nodes.Length " nodes...")
+        approxNodesConsumed += buyItemsAtPoints(nodes, screenshot)
+    }
 
     ; Only do the inner ring if the entity can actually reach it.
     ; We always get 6 guaranteed nodes before the entity starts consuming.
     ; Inner ring has 6 nodes and entity has to consume 2 before hitting inner ring.
-    if approxNodesConsumed > 2 or !useAutopurchase {
-        buyItemsAtPoints(bw.innerRing, 1, screenshot)
-    }
+    ; TODO: figure out how to reimplement this optimization
+    ; if approxNodesConsumed > 2 or !useAutopurchase {
+    ;     buyItemsAtPoints(bw.innerRing, screenshot)
+    ; }
     saveScreenshot(screenshot)
     screenshot.dispose()
     sw.report()
@@ -254,7 +273,7 @@ saveScreenshot(screenshot) {
 /**
  * @returns number of nodes consumed
  */
-buyItemsAtPoints(points, depth, screenshot) {
+buyItemsAtPoints(points, screenshot) {
     approxNodesConsumed := 0
 
     for point in points {
@@ -272,7 +291,7 @@ buyItemsAtPoints(points, depth, screenshot) {
                 maxDurationMs := 5000,
                 timeBetweenRetries := 2000
             )
-            approxNodesConsumed += depth
+            approxNodesConsumed += node.depth
         }
     }
     return approxNodesConsumed
