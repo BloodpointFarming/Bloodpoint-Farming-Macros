@@ -4,7 +4,7 @@ useItemButton := "RButton"
 
 ~Space:: {
     Send(buttonify(useItemButton))
-    Sleep(200)
+    Sleep(500)
     Send(buttonify(useItemButton))
 }
 
