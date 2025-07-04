@@ -38,8 +38,14 @@ abandonMatch() {
     ; Full process of abandoning the match.
     Send("{ESC}")
 
-    doWithRetriesUntil("doNothing", "isSettingsOpen")
-    doWithRetriesUntil("clickSettingsAbandonButton", "isAbandonConfirmOpen")
+    if not waitUntilF(isSettingsOpen)
+        return
+
+    if not doWithRetriesUntilF(
+        clickSettingsAbandonButton,
+        isAbandonConfirmOpen
+    )
+        return
 
     clickFinalAbandonButton()
 }
