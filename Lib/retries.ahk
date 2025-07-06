@@ -1,5 +1,6 @@
 #Requires AutoHotkey v2+
 #Include logging.ahk
+#Include debugging.ahk
 
 doWithRetriesUntil(actionName, predicateName, maxDurationMs := 500) {
     startTime := A_TickCount  ; Get the current time (in milliseconds)
@@ -29,7 +30,8 @@ doWithRetriesUntilF(
     action,
     predicate,
     maxDurationMs := 500,
-    timeBetweenRetries := 50
+    timeBetweenRetries := 50,
+    callSiteDepth := -1
 ) {
     startTime := A_TickCount  ; Get the current time (in milliseconds)
 
@@ -55,12 +57,13 @@ doWithRetriesUntilF(
             Sleep(10)
         }
     }
-
-    logger.warn("Failed waiting for predicate after " . maxDurationMs . " ms.")
+    caller := StackClass().getCaller(callSiteDepth)
+    method := caller.method ? caller.method : "()"
+    logger.warn("Failed waiting for " method " after " . maxDurationMs . " ms. " caller.filename ":" caller.line)
     return false
 }
 
-waitUntilF(predicate, maxDurationMs := 500) => doWithRetriesUntilF(doNothing, predicate, maxDurationMs)
+waitUntilF(predicate, maxDurationMs := 500) => doWithRetriesUntilF(doNothing, predicate, maxDurationMs, -2)
 
 waitUntil(predicateName, maxDurationMs := 500) => doWithRetriesUntil("doNothing", predicateName, maxDurationMs)
 
