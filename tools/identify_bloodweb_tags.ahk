@@ -1,10 +1,9 @@
 #Requires AutoHotkey v2+
 
 #Include ..\Lib\common.ahk
-#Include ..\Lib\Gdip_All.ahk
+#Include ..\Lib\gdip.ahk
 ListLines(0) ; perf
 Persistent(0)
-pToken := Gdip_Startup()
 
 imageDir := A_MyDocuments "\..\dbd\screenshots\bloodweb\nodes\1080"
 imageHeight := 1080
@@ -211,4 +210,3 @@ isBlobMarker(blob) {
     return height >= minBlobWidth and width >= minBlobWidth
 }
 
-Gdip_Shutdown(pToken)

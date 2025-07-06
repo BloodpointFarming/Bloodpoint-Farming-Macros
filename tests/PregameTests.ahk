@@ -2,7 +2,7 @@
 
 #Include Lib\test_includes.ahk
 #Include Lib\fakes.ahk
-#Include ..\Lib\Gdip_All.ahk
+#Include ..\Lib\gdip.ahk
 #Include ..\Lib\dbd.ahk
 #Include ..\Lib\scaling.ahk
 
@@ -12,14 +12,6 @@ if (A_ScriptFullPath = A_LineFile)
         .Test(PregameTests)
 
 class PregameTests {
-    __New() {
-        this.pToken := Gdip_Startup()
-    }
-
-    __Delete() {
-        Gdip_Shutdown(this.pToken)
-    }
-
     test_isReadiedUp_No1440() => assertFor("pregame\unready1440.png", () => !isReadiedUp())
     test_isReadiedUp_No1080() => assertFor("pregame\unready1080.png", () => !isReadiedUp())
     test_isReadiedUp_Yes1440() => assertFor("pregame\readiedUp1440.png", isReadiedUp.Bind())

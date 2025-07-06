@@ -1,9 +1,8 @@
 #Requires AutoHotkey v2.0
 
-#Include ..\Lib\Gdip_All.ahk
+#Include ..\Lib\gdip.ahk
 #Include ..\Lib\constants.ahk
 
-pToken := Gdip_Startup()
 
 class PBitmapImage {
     __New(pBitmap) {

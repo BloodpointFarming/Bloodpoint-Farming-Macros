@@ -2,7 +2,7 @@
 
 #Include Lib\test_includes.ahk
 #Include Lib\fakes.ahk
-#Include ..\Lib\Gdip_All.ahk
+#Include ..\Lib\gdip.ahk
 #Include ..\Lib\dbd.ahk
 #Include ..\Lib\scaling.ahk
 
@@ -12,14 +12,6 @@ if (A_ScriptFullPath = A_LineFile)
         .Test(SettingsTests)
 
 class SettingsTests {
-    __New() {
-        this.pToken := Gdip_Startup()
-    }
-
-    __Delete() {
-        Gdip_Shutdown(this.pToken)
-    }
-
     test_isSettingsOpen_Abandon1440() => assertFor("settings\matchdetailsAbandon1440.png", isSettingsOpen.Bind())
     test_isSettingsOpen_Quit1440() => assertFor("settings\matchdetailsQuit1440.png", isSettingsOpen.Bind())
     test_isSettingsOpen_Graphics1080() => assertFor("settings\graphics1080.png", isSettingsOpen.Bind())

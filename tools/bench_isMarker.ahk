@@ -1,5 +1,5 @@
 #Requires AutoHotkey v2+
-#Include ..\Lib\Gdip_All.ahk
+#Include ..\Lib\gdip.ahk
 #Include ..\Lib\common.ahk
 #Include Lib\bench.ahk
 
