@@ -1,6 +1,7 @@
 #Include Lib\test_includes.ahk
 #Include AutoUpdateTests.ahk
 #Include AutospenderTests.ahk
+#Include DebuggingTests.ahk
 #Include PregameTests.ahk
 #Include QTests.ahk
 #Include SettingsTests.ahk
@@ -11,6 +12,7 @@ Yunit
     .Test(
         AutoSpenderTests,
         AutoUpdateTests,
+        DebuggingTests,
         PregameTests,
         QTests,
         SettingsTests,
