@@ -133,7 +133,7 @@ class Bloodweb {
         ; brown: 25
 
         hsv := colorToHSV(color)
-        h := hsv[1]
+        h := hsv.hue
         if h <= 5
             return 1 ; pink
         else if h <= 75
