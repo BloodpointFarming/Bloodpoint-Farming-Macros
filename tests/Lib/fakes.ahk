@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0
 
 #Include ..\..\Lib\scaling.ahk
-#Include ..\..\Lib\Gdip_All.ahk
+#Include ..\..\Lib\gdip.ahk
 #Include ..\Yunit\Yunit.ahk
 
 class DbdTestWindow extends DbdWindowOps {

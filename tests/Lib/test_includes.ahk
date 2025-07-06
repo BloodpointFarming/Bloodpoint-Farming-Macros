@@ -8,3 +8,15 @@
 #Include fakes.ahk
 
 logger := TestLogger()
+
+assertEquals(expected, actual) {
+    if actual != expected {
+        throw Error("FAIL: " actual " != " expected, -2)
+    }
+}
+
+assertMatch(haystack, regex) {
+    if not RegExMatch(haystack, regex) {
+        throw Error("FAIL: did not find " regex " in " haystack, -2)
+    }
+}

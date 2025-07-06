@@ -2,7 +2,7 @@
 
 #Include Lib\test_includes.ahk
 #Include Lib\fakes.ahk
-#Include ..\Lib\Gdip_All.ahk
+#Include ..\Lib\gdip.ahk
 #Include ..\Lib\dbd.ahk
 #Include ..\Lib\scaling.ahk
 
@@ -12,14 +12,6 @@ if (A_ScriptFullPath = A_LineFile)
         .Test(TallyTests)
 
 class TallyTests {
-    __New() {
-        this.pToken := Gdip_Startup()
-    }
-
-    __Delete() {
-        Gdip_Shutdown(this.pToken)
-    }
-
     test_isTallyScreen_Bloodpoints1440() => assertFor("tally\tallyBloodpoints1440.png", isTallyScreen.Bind())
     test_isTallyScreen_Emblems1440() => assertFor("tally\tallyEmblems1440.png", isTallyScreen.Bind())
     test_isTallyScreen_Scoreboard1080() => assertFor("tally\tallyScoreboard1440.png", isTallyScreen.Bind())

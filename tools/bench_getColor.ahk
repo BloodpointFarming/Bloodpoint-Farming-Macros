@@ -1,10 +1,9 @@
 #Requires AutoHotkey v2+
-#Include ..\Lib\Gdip_All.ahk
+#Include ..\Lib\gdip.ahk
 #Include ..\Lib\common.ahk
 #Include Lib\bench.ahk
 Persistent(0)
 
-pToken := Gdip_Startup()
 x := 0
 y := 0
 c := Coords2K(0, 0)
@@ -37,5 +36,3 @@ benchPoints(() => ops.getColor(x, y), "ops")
 benchPoints(() => scaled.getColor(x, y), "scaled")
 benchPoints(() => coords.getColor(c), "coords")
 bench(oneScreenshot, "oneScreenshot")
-
-Gdip_Shutdown(pToken)

@@ -1,7 +1,7 @@
 ﻿#Requires AutoHotkey v2+
 
 #Include Lib\common.ahk
-#Include Lib\Gdip_All.ahk
+#Include Lib\gdip.ahk
 
 /**
  * Captures the tabs of the Tally screen as a single screenshot.
@@ -48,8 +48,6 @@ config := {
 }
 
 setTrayIcon("icons\tally.ico")
-
-Gdip_Startup()
 
 startTimer()
 

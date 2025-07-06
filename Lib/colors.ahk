@@ -67,7 +67,7 @@ colorToHSV(color) {
     if (h < 0)
         h += 360
 
-    return [h, s, maxVal]
+    return {hue: h, sat: s, value: maxVal}
 }
 
 isWhiteish(color, threshold := 0xD0, tolerance := 5) {
