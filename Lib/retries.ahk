@@ -63,7 +63,7 @@ doWithRetriesUntilF(
     return false
 }
 
-waitUntilF(predicate, maxDurationMs := 500) => doWithRetriesUntilF(doNothing, predicate, maxDurationMs, -2)
+waitUntilF(predicate, maxDurationMs := 500) => doWithRetriesUntilF(doNothing, predicate, maxDurationMs,, -2)
 
 waitUntil(predicateName, maxDurationMs := 500) => doWithRetriesUntil("doNothing", predicateName, maxDurationMs)
 
