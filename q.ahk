@@ -12,7 +12,7 @@ checkQ() {
         logger.info("Pressing Q.")
         
         Send("{q down}")
-        Sleep(50)
+        waitUntilF(() => not isQVisible(), 500)
         Send("{q up}")
     }
 }
