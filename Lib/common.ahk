@@ -2,6 +2,7 @@
 
 #Include autoupdate_run.ahk
 #Include colors.ahk
+#Include coords.ahk
 #Include constants.ahk
 #Include dbd.ahk
 #Include images.ahk
@@ -9,6 +10,7 @@
 #Include retries.ahk
 #Include scaling.ahk
 #Include stopwatch.ahk
+#Include subscreenshot.ahk
 
 #SingleInstance
 Persistent
