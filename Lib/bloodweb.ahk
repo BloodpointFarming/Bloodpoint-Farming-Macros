@@ -4,6 +4,7 @@
 #Include colors.ahk
 #Include coords.ahk
 #Include images.ahk
+#Include subscreenshot.ahk
 
 class Bloodweb {
     all := []

@@ -4,6 +4,7 @@
 #Include colors.ahk
 #Include coords.ahk
 #Include images.ahk
+#Include subscreenshot.ahk
 
 isDbdFinishedLoading() {
     ; The text of the ESC button moves around at different resolutions.
@@ -108,15 +109,22 @@ getBloodwebLevel() {
 
 isAbandonEscapeOptionVisible() {
     ; Looks for the pure black/white pixels of [ESC] ABANDON button in the top right
-    topLeft := Coords2K(2182, 74)
-    botRight := Coords2K(2222, 114)
+    static topLeft := Coords2K(2182, 74)
+    static botRight := Coords2K(2222, 114)
+    static abandonD := Coords2K(2322, 90)
 
-    sub := Subscreenshot.enclose([topLeft, botRight])
-    img := sub.img
-    counts := countPureColors(img)
-    ratioBlack := counts.black / img.size()
-    ratioWhite := counts.white / img.size()
-    return ratioBlack > 0.3 and ratioWhite > 0.05
+    hasEnoughBlackWhitePixels(sub) {
+        img := sub.img
+        counts := countPureColors(img)
+        ratioBlack := counts.black / img.size()
+        ratioWhite := counts.white / img.size()
+        return ratioBlack > 0.3 and ratioWhite > 0.05
+    }
+
+    if not Subscreenshot.enclose([topLeft, botRight], hasEnoughBlackWhitePixels)
+        return false
+
+    return isWhiteish(coords.getColor(abandonD), 0x90)
 }
 
 isAbandonConfirmOpen() {
@@ -176,12 +184,7 @@ isReadyButtonVisible() {
 isQVisible() {
     topLeft := Coords2K(392, 1113)
     botRight := Coords2K(432, 1156)
-    sub := Subscreenshot.enclose([topLeft, botRight])
-    img := sub.img
-    ; Count the pure black/white pixels as a heuristic for the prompt.
-    counts := countPureColors(img)
-    sub.dispose()
-
-    ratioBlack := counts.black / img.size()
+    counts := Subscreenshot.enclose([topLeft, botRight], (s) => countPureColors(s.img))
+    ratioBlack := counts.black / counts.size
     return ratioBlack > 0.3 and counts.white >= 2
 }
