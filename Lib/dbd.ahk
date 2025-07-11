@@ -4,6 +4,7 @@
 #Include colors.ahk
 #Include coords.ahk
 #Include images.ahk
+#Include subscreenshot.ahk
 
 isDbdFinishedLoading() {
     ; The text of the ESC button moves around at different resolutions.
@@ -108,15 +109,25 @@ getBloodwebLevel() {
 
 isAbandonEscapeOptionVisible() {
     ; Looks for the pure black/white pixels of [ESC] ABANDON button in the top right
-    topLeft := Coords2K(2182, 74)
-    botRight := Coords2K(2222, 114)
+    static topLeft := Coords2K(2182, 74)
+    static botRight := Coords2K(2222, 114)
+    static abandonD := Coords2K(2322, 90)
 
-    sub := Subscreenshot.enclose([topLeft, botRight])
-    img := sub.img
-    counts := countPureColors(img)
-    ratioBlack := counts.black / img.size()
-    ratioWhite := counts.white / img.size()
-    return ratioBlack > 0.3 and ratioWhite > 0.05
+    try {
+        sub := Subscreenshot.enclose([topLeft, botRight])
+
+        img := sub.img
+        counts := countPureColors(img)
+        ratioBlack := counts.black / img.size()
+        ratioWhite := counts.white / img.size()
+        if not (ratioBlack > 0.3 and ratioWhite > 0.05)
+            return false
+
+        return isWhiteish(coords.getColor(abandonD), 0x90)
+
+    } finally {
+        sub.dispose()
+    }
 }
 
 isAbandonConfirmOpen() {
