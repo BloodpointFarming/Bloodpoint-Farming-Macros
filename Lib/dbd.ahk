@@ -113,21 +113,18 @@ isAbandonEscapeOptionVisible() {
     static botRight := Coords2K(2222, 114)
     static abandonD := Coords2K(2322, 90)
 
-    try {
-        sub := Subscreenshot.enclose([topLeft, botRight])
-
+    hasEnoughBlackWhitePixels(sub) {
         img := sub.img
         counts := countPureColors(img)
         ratioBlack := counts.black / img.size()
         ratioWhite := counts.white / img.size()
-        if not (ratioBlack > 0.3 and ratioWhite > 0.05)
-            return false
-
-        return isWhiteish(coords.getColor(abandonD), 0x90)
-
-    } finally {
-        sub.dispose()
+        return ratioBlack > 0.3 and ratioWhite > 0.05
     }
+
+    if not Subscreenshot.enclose([topLeft, botRight], hasEnoughBlackWhitePixels)
+        return false
+
+    return isWhiteish(coords.getColor(abandonD), 0x90)
 }
 
 isAbandonConfirmOpen() {
@@ -187,12 +184,7 @@ isReadyButtonVisible() {
 isQVisible() {
     topLeft := Coords2K(392, 1113)
     botRight := Coords2K(432, 1156)
-    sub := Subscreenshot.enclose([topLeft, botRight])
-    img := sub.img
-    ; Count the pure black/white pixels as a heuristic for the prompt.
-    counts := countPureColors(img)
-    sub.dispose()
-
-    ratioBlack := counts.black / img.size()
+    counts := Subscreenshot.enclose([topLeft, botRight], (s) => countPureColors(s.img))
+    ratioBlack := counts.black / counts.size
     return ratioBlack > 0.3 and counts.white >= 2
 }
