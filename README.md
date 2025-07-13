@@ -26,6 +26,10 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 - To reload icons: Play > Learn to Play > Survivor Tutorial > Exit.
 - Purchase order is based off of the 5 colored tags: Pink > Purple > Blue > Green > Brown
 
+### Auto Click
+- Auto-clicker for spending bloodpoints or spamming M1 in a reactive healing circle.
+- F3 = Toggle ON / F4 or WASD = Toggle OFF
+
 ### Ready Up
 - Clicks the ready button as soon as it becomes visible.
 - Disables if the user manually unreadies.
