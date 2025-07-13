@@ -11,7 +11,7 @@ Requirements:
 
 setTrayIcon("icons/esc.ico")
 
-SetTimer(CheckForAbandon, 500)
+SetTimer(CheckForAbandon, 250)
 
 ~^+a::
 {
