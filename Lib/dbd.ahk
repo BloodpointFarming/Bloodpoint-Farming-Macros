@@ -111,7 +111,7 @@ isAbandonEscapeOptionVisible() {
     ; Looks for the pure black/white pixels of [ESC] ABANDON button in the top right
     static topLeft := Coords2K(2182, 74)
     static botRight := Coords2K(2222, 114)
-    static abandonD := Coords2K(2322, 90)
+    static abandonText := Coords2K(2339, 91)
 
     hasEnoughBlackWhitePixels(sub) {
         img := sub.img
@@ -124,7 +124,7 @@ isAbandonEscapeOptionVisible() {
     if not Subscreenshot.enclose([topLeft, botRight], hasEnoughBlackWhitePixels)
         return false
 
-    return isWhiteish(coords.getColor(abandonD), 0x90)
+    return isWhiteish(coords.getColor(abandonText), 0x90)
 }
 
 isAbandonConfirmOpen() {
