@@ -112,6 +112,7 @@ isAbandonEscapeOptionVisible() {
     static topLeft := Coords2K(2182, 74)
     static botRight := Coords2K(2222, 114)
     static abandonText := Coords2K(2339, 91)
+    static abandonText2 := Coords2K(2286, 95)
 
     hasEnoughBlackWhitePixels(sub) {
         img := sub.img
@@ -124,7 +125,12 @@ isAbandonEscapeOptionVisible() {
     if not Subscreenshot.enclose([topLeft, botRight], hasEnoughBlackWhitePixels)
         return false
 
-    return isWhiteish(coords.getColor(abandonText), 0x90)
+    c1 := coords.getColor(abandonText)
+    if not isWhiteish(c1, 0x90, tolerance := 7)
+        return false
+
+    c2 := coords.getColor(abandonText2)
+    return isRgbSimilar(c1, c2, threshold := 2)
 }
 
 isAbandonConfirmOpen() {

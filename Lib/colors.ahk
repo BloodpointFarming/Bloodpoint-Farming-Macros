@@ -118,3 +118,16 @@ countPureColors(img) {
     }
     return { white: pureWhite, black: pureBlack, size: img.size() }
 }
+
+isRgbSimilar(c1, c2, threshold := 1) {
+    r1 := (c1 >> 16) & 0xFF
+    g1 := (c1 >> 8) & 0xFF
+    b1 := c1 & 0xFF
+
+    r2 := (c2 >> 16) & 0xFF
+    g2 := (c2 >> 8) & 0xFF
+    b2 := c2 & 0xFF
+
+    result := Abs(r1 - r2) <= threshold and Abs(g1 - g2) <= threshold and Abs(g1 - g2) <= threshold
+    return result
+}
