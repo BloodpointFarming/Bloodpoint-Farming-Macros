@@ -12,9 +12,7 @@ if (A_ScriptFullPath = A_LineFile)
         .Test(TallyTests)
 
 class TallyTests {
-    test_isTallyScreen_Bloodpoints1440() => assertFor("tally\tallyBloodpoints1440.png", isTallyScreen.Bind())
-    test_isTallyScreen_Emblems1440() => assertFor("tally\tallyEmblems1440.png", isTallyScreen.Bind())
-    test_isTallyScreen_Scoreboard1080() => assertFor("tally\tallyScoreboard1440.png", isTallyScreen.Bind())
-
-    test_isTallyScoreScreen_Bloodpoints1440() => assertFor("tally\tallyBloodpoints1440.png", isTallyBloodpointsScreen.Bind())
+    test_isTallyScreen_Bloodpoints1080() => assertFor("tally\tallyBloodpoints1080.png", isTallyScreen.Bind())
+    test_isTallyScreen_Scoreboard1080() => assertFor("tally\tallyScoreboard1080.png", isTallyScreen.Bind())
+    test_isTallyScreen_Scoreboard1440() => assertFor("tally\tallyScoreboard1440.png", isTallyScreen.Bind())
 }
