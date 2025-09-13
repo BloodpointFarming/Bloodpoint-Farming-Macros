@@ -178,8 +178,8 @@ autoPurchase() {
             ; think of something better.
             color := coords.getColor(apbLeftRed)
             hsv := colorToHSV(color)
-            h := hsv[1]
-            s := hsv[2]
+            h := hsv.hue
+            s := hsv.sat
             redishNow := (h > 350 or h < 15) and s > 0.5 ; isRedish() can't handle red this dark.
 
             if !hasRedDisappeared and !redishNow {
