@@ -4,6 +4,7 @@
 #Include colors.ahk
 #Include coords.ahk
 #Include images.ahk
+#Include ocr_shim.ahk
 #Include subscreenshot.ahk
 
 isDbdFinishedLoading() {
@@ -44,66 +45,51 @@ isSettingsGraphicsFpsMenuOpen() {
 }
 
 getBloodwebLevel() {
-    ; Decision-tree OCR.
-    ; Highly efficient. Zero dependencies. Questionably reliable.
-    ; Returns -1 if no level is present.
-    ; TODO: Probably thinks a pure white screen is a digit.
+    static opts := { }
+    static dbdWidth := -1
+    static dbdHeight := -1
 
-    if (dbdWindow.height != 1080 && dbdWindow.height != 1440) {
-        ; UI elements move around at other resolutions. It's not going to work.
-        return -1
+    ; Full screen capture is expensive. ~150 ms at 1440p.
+    ; First time we detect the position of "BLOODWEB LEVEL 15" text, we'll save and use the location next time
+    isOptsStale := dbdWindow.height != dbdHeight or dbdWindow.width != dbdWidth
+    if isOptsStale {
+        ; For some reason, level is not detected at 1080p when opts := {}, but is detected correctly when either:
+        ; - { invertcolors: true }
+        ; - { w: Integer(dbdWindow.width / 2), h: Integer(dbdWindow.height / 4) }
+        ; ... or both.
+        opts := { invertcolors: true, w: Integer(dbdWindow.width / 2), h: Integer(dbdWindow.height / 4) }
     }
 
-    if dbdWindow.height = 1080
-        screenshot := Subscreenshot.of(601, 80, 24, 16)
-    else
-        screenshot := Subscreenshot.of(795, 106, 33, 23)
+    level := -1
 
-    isLit(x, y) {
-        ; Check if the pixel is plausibly text in the bloodweb.
-        color := screenshot.getColorLiteral(x, y) ; no scaling! coords are specific to 1080 or 1440.
+    result := ocrShim(opts)
+    for line in result.Lines {
+        logger.debug(line.Text)
+        ; "8LOODWE8" is poorly detected at 720p and below. "LEVEL" is reliable.
+        if line.Words.Length = 3 and line.Words[2].Text = "LEVEL" {
+            levelText := line.Words[3].Text
+            if IsInteger(levelText) {
+                level := Integer(levelText)
+                if (level >= 1 and level <= 50) {
+                    if isOptsStale {
+                        ; Perf: next time, check only this region of the screen unless the window is resized
+                        dbdWidth := dbdWindow.width
+                        dbdHeight := dbdWindow.height
 
-        r := (color >> 16) & 0xFF
-        g := (color >> 8) & 0xFF
-        b := color & 0xFF
-        hsl := RGBtoHSL(r, g, b)
-
-        s := hsl[2]
-        l := hsl[3]
-
-        isBright := l >= 0xA0 / 0xFF
-        isDesaturated := s < 0.15
-
-        logger.trace("(" x ", " y ")=" color " isBright=" isBright " isDesaturated=" isDesaturated " s=" s)
-
-        return isBright && isDesaturated
+                        padding := 10 ; 10 px seems to be the minimum for reliable detection. A dummy (e.g. black) border would be better, but it's nontrivial to do.
+                        opts.x := line.x - padding
+                        opts.y := line.y - padding
+                        opts.w := line.w + padding + padding + (level < 10 ? line.Words[3].w : 0) ; double digits == double width
+                        opts.h := line.h + padding + padding
+                    }
+                }
+                break
+            }
+        }
     }
 
-    logger.trace("tens:")
-    if (dbdWindow.height = 1080) {
-        digit10 := isLit(601, 86) ? (isLit(610, 84) ? (isLit(601, 92) ? (isLit(605, 88) ? (isLit(605, 81) ? (8) : (-1)) : (isLit(605, 81) ? (0) : (-1))) : (isLit(608, 93) ? (9) : (-1))) : (isLit(602, 80) ? (isLit(608, 93) ? (5) : (-1)) : (isLit(605, 81) ? (6) : (-1)))) : (isLit(610, 92) ? (isLit(602, 81) ? (isLit(608, 93) ? (3) : (-1)) : (isLit(604, 92) ? (4) : (-1))) : (isLit(601, 84) ? (isLit(601, 95) ? (isLit(607, 90) ? (2) : (-1)) : (isLit(607, 90) ? (1) : (-1))) : (isLit(607, 90) ? (7) : (-1))))
-    } else if (dbdWindow.height = 1440) {
-        digit10 := isLit(802, 120) ? (isLit(796, 117) ? (isLit(798, 128) ? (isLit(796, 111) ? (9) : (-1)) : (isLit(804, 121) ? (4) : (-1))) : (isLit(809, 126) ? (isLit(806, 108) ? (2) : (-1)) : (isLit(809, 106) ? (isLit(795, 107) ? (7) : (-1)) : (isLit(804, 123) ? (1) : (-1))))) : (isLit(808, 112) ? (isLit(796, 118) ? (isLit(802, 117) ? (isLit(796, 123) ? (8) : (-1)) : (isLit(798, 123) ? (0) : (-1))) : (isLit(796, 111) ? (3) : (-1))) : (isLit(796, 120) ? (isLit(799, 126) ? (6) : (-1)) : (isLit(807, 120) ? (5) : (-1))))
-    }
-
-    logger.trace("ones:")
-    if (dbdWindow.height = 1080) {
-        digit1 := isLit(615, 86) ? (isLit(624, 84) ? (isLit(615, 92) ? (isLit(619, 88) ? (isLit(619, 81) ? (8) : (-1)) : (isLit(619, 81) ? (0) : (-1))) : (isLit(622, 93) ? (9) : (-1))) : (isLit(616, 80) ? (isLit(622, 93) ? (5) : (-1)) : (isLit(619, 81) ? (6) : (-1)))) : (isLit(624, 92) ? (isLit(616, 81) ? (isLit(622, 93) ? (3) : (-1)) : (isLit(618, 92) ? (4) : (-1))) : (isLit(615, 84) ? (isLit(615, 95) ? (isLit(621, 90) ? (2) : (-1)) : (isLit(621, 90) ? (1) : (-1))) : (isLit(621, 90) ? (7) : (-1))))
-    } else if (dbdWindow.height = 1440) {
-        digit1 := isLit(820, 120) ? (isLit(814, 117) ? (isLit(816, 128) ? (isLit(814, 111) ? (9) : (-1)) : (isLit(822, 121) ? (4) : (-1))) : (isLit(827, 126) ? (isLit(824, 108) ? (2) : (-1)) : (isLit(827, 106) ? (isLit(813, 107) ? (7) : (-1)) : (isLit(822, 123) ? (1) : (-1))))) : (isLit(826, 112) ? (isLit(814, 118) ? (isLit(820, 117) ? (isLit(814, 123) ? (8) : (-1)) : (isLit(816, 123) ? (0) : (-1))) : (isLit(814, 111) ? (3) : (-1))) : (isLit(814, 120) ? (isLit(817, 126) ? (6) : (-1)) : (isLit(825, 120) ? (5) : (-1))))
-    }
-    screenshot.dispose()
-
-    logger.trace("digit10=" digit10 " digit1=" digit1)
-
-    ; Bloodweb level is left-aligned, so the tens digit actually houses levels 0-9 and the ones digit is empty.
-    ; If tens digit is missing, then it's not a valid bloodweb level.
-    if (digit10 = -1)
-        return -1
-    if (digit1 = -1)
-        return digit10
-    level := digit10 * 10 + digit1
     logger.debug("level=" level)
+
     return level
 }
 

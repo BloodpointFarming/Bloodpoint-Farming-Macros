@@ -13,8 +13,8 @@ if (A_ScriptFullPath = A_LineFile)
         .Test(AutoSpenderTests)
 
 class AutoSpenderTests {
-    test_getBloodwebLevel_Level49_1440() => assertFor("bloodweb\bloodweb_1440_level32.png", () => getBloodwebLevel() == 32)
-    test_getBloodwebLevel_Level20_1080() => assertFor("bloodweb\bloodweb_1080_level20.png", () => getBloodwebLevel() == 20)
+    test_getBloodwebLevels1440() => testBloodwebLevels(A_ScriptDir "\screenshots\bloodweb\1440")
+    test_getBloodwebLevels1080() => testBloodwebLevels(A_ScriptDir "\screenshots\bloodweb\1080")
 
     test_getBloodwebFull() {
         assertMarkers(nodes) {
@@ -132,4 +132,17 @@ countBloodwebItems() {
             c += 1
     }
     return c
+}
+
+testBloodwebLevels(root) {
+    ; Loop files matching one or two digit filenames like "5.png" or "12.png"
+    loop files, root "\\*.png" {
+        name := StrSplit(A_LoopFileName, "\\").Pop()
+        if RegExMatch(name, "^(\d?\d)\.png$", &m) {
+            expected := Integer(m[1])
+            logger.info("Is " name " is level=" expected "?")
+            screenshotPath := root "\" name
+            assertBloodwebLevel(expected, screenshotPath)
+        }
+    }
 }

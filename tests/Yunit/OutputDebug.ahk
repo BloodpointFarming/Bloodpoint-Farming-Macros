@@ -28,7 +28,7 @@ class YunitOutputDebug{
 		if Result is Error
 		{
 			this.tests.fail := this.tests.fail + 1
-			Details := "at line " Result.Line " (" Result.Message ") - (" result.file ")"
+			Details := " (" Result.Message ") [" result.file ":" Result.Line "]"
 			Status := "FAIL"
 		} else {
 			this.tests.pass := this.tests.pass + 1

@@ -4,6 +4,7 @@
 #Include ..\..\Lib\gdip.ahk
 #Include ..\..\Lib\capture.ahk
 #Include ..\..\Lib\images.ahk
+#Include ..\..\Lib\ocr_shim.ahk
 #Include ..\Yunit\Yunit.ahk
 
 class DbdTestWindow extends DbdWindowOps {
@@ -101,7 +102,7 @@ class FakeCapture extends WindowCapture {
 }
 
 setupFakeWindow(screenshotPath) {
-    global dbdWindow, ops, scaled, capture
+    global dbdWindow, ops, scaled, capture, ocrFunction
     pBitmap := Gdip_CreateBitmapFromFile(screenshotPath)
     if pBitmap = 0
         throw Error("pBitmap = 0 for " screenshotPath " ")
@@ -109,6 +110,8 @@ setupFakeWindow(screenshotPath) {
     capture := FakeCapture(pBitmap)
     dbdWindow := DbdTestWindow(pBitmap)
     ops := TestOps(pBitmap)
+    ; OCR.DisplayImage := True
+    ocrFunction := (opts := 0) => OCR.FromBitmap(pBitmap, opts)
     return pBitmap
 }
 
