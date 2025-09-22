@@ -65,9 +65,13 @@ getBloodwebLevel() {
     result := ocrShim(opts)
     for line in result.Lines {
         logger.debug(line.Text)
-        ; "8LOODWE8" is poorly detected at 720p and below. "LEVEL" is reliable.
-        if line.Words.Length = 3 and line.Words[2].Text = "LEVEL" {
-            levelText := line.Words[3].Text
+        ; OCR isn't perfect, particularly at low resolutions. near misidentifications include:
+        ; BLOODWEB LFVEL 20
+        ; BLOODWEULEVEL 27
+        ; BLOODWEB ILEVEL 26
+        ; BLOODWEÉEYEL 27
+        if RegExMatch(line.Text, ".*EL\s+\d\d?") {
+            levelText := line.Words[line.Words.Length].Text
             if IsInteger(levelText) {
                 level := Integer(levelText)
                 if (level >= 1 and level <= 50) {

@@ -248,7 +248,10 @@ clickAutopurchase() {
     }
 }
 
-hasLevelChanged() => getBloodwebLevel() != prevLevel
+hasLevelChanged() {
+    level := getBloodwebLevel()
+    return level > 0 and level != prevLevel
+}
 
 isGuranteedLevel(level) => level >= 1 and level <= 11 and level != 10
 
