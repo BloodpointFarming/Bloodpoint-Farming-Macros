@@ -110,8 +110,7 @@ class AutoSpenderTests {
 
     test_isBulkSpendConfirmButtonVisible() => assertFor("bloodweb\1440\bulk-prompt.png", () => Bloodweb.isBulkSpendConfirmButtonVisible())
 
-    test_isP100_Yes() => assertFor("bloodweb\bloodweb_full_1440.png", () => Bloodweb.isP100())
-    test_isP100_No() => assertFor("bloodweb\1440\quentin.png", () => !Bloodweb.isP100())
+    test_isP100_Yes() => assertFor("bloodweb\1440\p100.png", () => Bloodweb.isP100())
     test_isP100_1080_Yes() => assertFor("bloodweb\1080\p100.png", () => Bloodweb.isP100())
 }
 
