@@ -153,7 +153,7 @@ tallyLeftArrowDark := Coords2K(353, 1193)
 tallyRightArrowWhite := Coords2K(859, 1197)
 tallyRightArrowDark := Coords2K(872, 1194)
 
-tallyContinueButtonRed := Coords2K(2385, 1348)
+tallyContinueButtonRed := Coords2K(2424, 1348)
 
 isTallyScreen() {
     isLeftArrowWhiteish() => isWhiteish(coords.getColor(tallyLeftArrowWhite))
