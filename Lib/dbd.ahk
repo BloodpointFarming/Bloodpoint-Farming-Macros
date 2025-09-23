@@ -45,7 +45,7 @@ isSettingsGraphicsFpsMenuOpen() {
 }
 
 getBloodwebLevel() {
-    static opts := { }
+    static opts := {}
     static dbdWidth := -1
     static dbdHeight := -1
 
@@ -126,9 +126,11 @@ isAbandonEscapeOptionVisible() {
 isAbandonConfirmOpen() {
     ; After we click Abandon, we get a confirmation dialog
     ; It has a title of ABANDON in pure white
-    global confirmWhiteA := scaled.getColor(1171, 380)
+    global confirmWhiteA := scaled.getColor(1171, 382)
     global confirmWhiteN := scaled.getColor(1375, 372)
-    return confirmWhiteA = 0xFFFFFF and confirmWhiteN = 0xFFFFFF
+    a := confirmWhiteA = 0xFFFFFF
+    n := confirmWhiteN = 0xFFFFFF
+    return a and n
 }
 
 isHookSpaceOptionAvailable() {
