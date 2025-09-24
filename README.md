@@ -23,7 +23,7 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 - Demo: https://youtu.be/h3Yr9y5W7GU
 - Supports 1080p and 1440p resolutions at 100% UI scale only. Run windowed at these resolutions if you need to. Disable filters if they interfere.
 - Use NightLight to install the icons you want prioritized from the 🟥 🟪 🟦 🟩 🟫 version of the icon pack: https://nightlight.gg/packs/bloodpointfarmingautospender
-- To reload icons: Play > Learn to Play > Survivor Tutorial > Exit.
+- To reload icons, close and reopen the bloodweb. (If that doesn't work, Play > Learn to Play > Survivor Tutorial > Exit.)
 - Purchase order is based off of the 5 colored tags: Pink > Purple > Blue > Green > Brown
 
 ### Auto Click
