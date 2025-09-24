@@ -22,7 +22,8 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 - F6 to purchase tagged items from the bloodweb using the [fast bloodweb tech](https://www.reddit.com/r/deadbydaylight/s/njguTZBODp).
 - Demo: https://youtu.be/h3Yr9y5W7GU
 - Supports 1080p and 1440p resolutions at 100% UI scale only. Run windowed at these resolutions if you need to. Disable filters if they interfere.
-- Use NightLight to install the icons you want prioritized from the 🟥 🟪 🟦 🟩 🟫 version of the icon pack: https://nightlight.gg/packs/bloodpointfarmingautospender
+- Use [NightLight](https://nightlight.gg/desktop) to tag the icons you want prioritized from the 🟥 🟪 🟦 🟩 🟫 version of the [bloodpoint-farming-autospender icon pack](https://nightlight.gg/packs/bloodpointfarmingautospender). Untagged items are autopurchased.
+  - Alternatively, manually manage the tagged icons in `C:\Program Files (x86)\Steam\steamapps\common\Dead by Daylight\DeadByDaylight\Content\UI\Icons`
 - To reload icons, close and reopen the bloodweb. (If that doesn't work, Play > Learn to Play > Survivor Tutorial > Exit.)
 - Purchase order is based off of the 5 colored tags: Pink > Purple > Blue > Green > Brown
 
