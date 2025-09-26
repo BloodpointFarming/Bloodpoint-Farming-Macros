@@ -9,6 +9,8 @@
 #Include Lib\progress.ahk
 #Include Lib\logging.ahk
 
+setTrayIcon("icons/stopwatch.ico")
+
 config := {
     /**
      * How long should we wait for repair to resume before deciding it's completed?
