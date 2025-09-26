@@ -76,6 +76,12 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 - If that doesn't work, activate manually with Ctrl+Shift+A.
 - UI scale must be 100%
 
+### Repair Speed Tracker
+- Tracks generator repair progress over time
+- Exports raw data to a TSV file in `%TEMP%\repair` named like `2025-09-25_22-09-21 repair 58 pct in 41.9 sec 1.24 cps.tsv`
+- Pausing/resuming repair for up to 2 seconds is considered the same repair session (e.g. bounce tech, switching toolbox)
+- Create pretty graphs in google sheets, excel, or your tool of choice
+
 ## Killer macros
 ### Killer Shuffle
 - Killer will repeatedly move forwards and backwards in place to allow survivors to get into chase (Spin blinding, Gen dancing, etc.).
