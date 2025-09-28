@@ -57,7 +57,7 @@ getBloodwebLevel() {
         ; - { invertcolors: true }
         ; - { w: Integer(dbdWindow.width / 2), h: Integer(dbdWindow.height / 4) }
         ; ... or both.
-        opts := { invertcolors: true, w: Integer(dbdWindow.width / 2), h: Integer(dbdWindow.height / 4) }
+        opts := { lang: "en-US", invertcolors: true, w: Integer(dbdWindow.width / 2), h: Integer(dbdWindow.height / 4) }
     }
 
     level := -1
