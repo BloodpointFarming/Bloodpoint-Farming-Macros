@@ -70,7 +70,8 @@ getBloodwebLevel() {
         ; BLOODWEULEVEL 27
         ; BLOODWEB ILEVEL 26
         ; BLOODWEÉEYEL 27
-        if RegExMatch(line.Text, ".*EL\s+\d\d?") {
+        ; Just rip out the numbers. This will work for multiple languages too.
+        if RegExMatch(line.Text, ".*\s+\d\d?") {
             levelText := line.Words[line.Words.Length].Text
             if IsInteger(levelText) {
                 level := Integer(levelText)
