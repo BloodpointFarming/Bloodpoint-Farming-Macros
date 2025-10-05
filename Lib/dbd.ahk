@@ -84,7 +84,7 @@ getBloodwebLevel() {
                         padding := 10 ; 10 px seems to be the minimum for reliable detection. A dummy (e.g. black) border would be better, but it's nontrivial to do.
                         opts.x := line.x - padding
                         opts.y := line.y - padding
-                        opts.w := line.w + padding + padding + (level < 10 ? line.Words[3].w : 0) ; double digits == double width
+                        opts.w := line.w + padding + padding + (level < 10 ? line.Words[line.Words.Length].w : 0) ; double digits == double width
                         opts.h := line.h + padding + padding
                     }
                 }
