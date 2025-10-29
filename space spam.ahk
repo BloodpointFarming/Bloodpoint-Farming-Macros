@@ -18,9 +18,9 @@ spaceHeld := false
     global
     spaceHeld := true
     Sleep 200
-    while spaceHeld {
+    while spaceHeld and WinActive(dbdWinTitle) {
         Send "{Space}"
-        Sleep 100
+        Sleep 50
     }
 }
 
