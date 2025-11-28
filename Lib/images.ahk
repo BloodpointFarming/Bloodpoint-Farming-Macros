@@ -38,7 +38,7 @@ class PBitmapImage {
         return pixel & 0xFFFFFF
     }
 
-    dispose() {
+    __Delete() {
         if this.pBitmap != 0 {
             data := this.bitmapData
             Gdip_UnlockBits(this.pBitmap, &data)
