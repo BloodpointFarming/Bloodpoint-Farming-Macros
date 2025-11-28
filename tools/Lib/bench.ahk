@@ -10,5 +10,7 @@ bench(f, label := "bench", maxDuration := 2000) {
         f.Call()
     }
 
-    logger.info(label ": " i " iterations " (A_TickCount - start) / i " ms/iteration")
+    ms := (A_TickCount - start) / i
+    
+    logger.info(label ": " i " iterations " Format("{:.3f}", ms) " ms/iteration")
 }
