@@ -1,7 +1,7 @@
 ﻿#Requires AutoHotkey v2
 
 /**
- * https://github.com/Descolada/OCR/blob/a1f7a4f0be9a6827a31c30ba734ed16e2973628c/Lib/OCR.ahk
+ * https://github.com/Descolada/OCR/releases/tag/v2.0.0
  */
 
 /**
@@ -10,7 +10,8 @@
  * 
  * Ways of initiating OCR:
  * OCR(RandomAccessStreamOrSoftwareBitmap, Options?)
- * OCR.FromDesktop(Options?, Monitor?)
+ * OCR.FromDesktop(Options?)
+ * OCR.FromMonitor(Monitor?, Options?)
  * OCR.FromRect(X, Y, W, H, Options?)
  * OCR.FromWindow(WinTitle:="", Options?, WinText:="", ExcludeTitle:="", ExcludeText:="")
  *      Note: the result object coordinates will be in CoordMode "Pixel"
@@ -37,7 +38,7 @@
  * }
  * 
  * Note: Options also accepts any optional parameters after it like named parameters.
- * Eg. OCR.FromDesktop({lang:"en-us", monitor:2})
+ * Eg. OCR.FromMonitor({lang:"en-us", monitor:2})
  * 
  * Additional methods:
  * OCR.GetAvailableLanguages()
@@ -113,6 +114,7 @@
  * Powershell (run as admin) with the following command: Get-WindowsCapability -Online | Where-Object { $_.Name -Like 'Language.OCR*' } 
  */
 class OCR {
+    static Version => "2.0.0"
     static IID_IRandomAccessStream := "{905A0FE1-BC53-11DF-8C49-001E4FC686DA}"
          , IID_IPicture            := "{7BF80980-BF32-101A-8BBB-00AA00300CAB}"
          , IID_IAsyncInfo          := "{00000036-0000-0000-C000-000000000046}"
@@ -286,9 +288,9 @@ class OCR {
         SoftwareBitmapCommon:
 
         if (grayscale || invertcolors || monochrome || this.DisplayImage) {
-            ComCall(15, SoftwareBitmap, "int", 2, "ptr*", BitmapBuffer := ComValue(13,0)) ; LockBuffer
+            ComCall(15, SoftwareBitmap, "int", 2, "ptr*", &BitmapBuffer := 0) ; LockBuffer
             MemoryBuffer := ComObjQuery(BitmapBuffer, "{fbc4dd2a-245b-11e4-af98-689423260cf8}")
-            ComCall(6, MemoryBuffer, "ptr*", MemoryBufferReference := ComValue(13,0)) ; CreateReference
+            ComCall(6, MemoryBuffer, "ptr*", &MemoryBufferReference := 0) ; CreateReference
             BufferByteAccess := ComObjQuery(MemoryBufferReference, "{5b0d3235-4dba-4d44-865e-8f1d0e4fd04d}")
             ComCall(3, BufferByteAccess, "ptr*", &SoftwareBitmapByteBuffer:=0, "uint*", &BufferSize:=0) ; GetBuffer
            
@@ -310,7 +312,7 @@ class OCR {
                 this.DisplayHBitmap(hbm)
             }
             
-            BufferByteAccess := "", MemoryBufferReference := "", MemoryBuffer := "", BitmapBuffer := "" ; Release in correct order
+            BufferByteAccess := "", ObjRelease(MemoryBufferReference), MemoryBuffer := "", ObjRelease(BitmapBuffer) ; Release in correct order
         }
 
         ComCall(6, this.OcrEngine, "ptr", SoftwareBitmap, "ptr*", Result:=ComValue(13,0))   ; RecognizeAsync
@@ -1016,20 +1018,29 @@ class OCR {
     }
 
     /**
-     * Returns an OCR results object for the whole desktop. Locations of the words will be relative to
+     * Returns an OCR results object for the specified monitor. Locations of the words will be relative to
      * the primary screen (CoordMode "Screen"), even if a secondary monitor is being captured.
-     * @param Options Optional: OCR options {lang, scale, grayscale, invertcolors, rotate, flip, x, y, w, h, decoder}. 
      * @param Monitor Optional: The monitor from which to get the desktop area. Default is primary monitor.
      *   If screen scaling between monitors differs, then use DllCall("SetThreadDpiAwarenessContext", "ptr", -3)
+     * @param Options Optional: OCR options {lang, scale, grayscale, invertcolors, rotate, flip, x, y, w, h, decoder}. 
      * @returns {OCR.Result} 
      */
-    static FromDesktop(Monitor?, Options:=0) {
+    static FromMonitor(Monitor?, Options:=0) {
         if !Options && IsSet(Monitor) && IsObject(Monitor)
             Options := Monitor, Monitor := unset
         this.__ExtractNamedParameters(Options, "Monitor", &Monitor)
         MonitorGet(monitor?, &Left, &Top, &Right, &Bottom)
         return this.FromRect(Left, Top, Right-Left, Bottom-Top, Options)
     }
+
+    /**
+     * Returns an OCR results object for the whole virtual screen. Locations of the words will be relative to
+     * the primary screen (CoordMode "Screen").
+     * @param Options Optional: OCR options {lang, scale, grayscale, invertcolors, rotate, flip, x, y, w, h, decoder}. 
+     *   If screen scaling between monitors differs, then use DllCall("SetThreadDpiAwarenessContext", "ptr", -3)
+     * @returns {OCR.Result}
+     */
+    static FromDesktop(Options:=0) => this.FromRect(SysGet(76), SysGet(77), SysGet(78), SysGet(79), Options)
 
     /**
      * Returns an OCR results object for a region of the screen. Locations of the words will be relative
@@ -1592,6 +1603,10 @@ class OCR {
         
         if IsSet(dhDC)
             DllCall("DeleteDC", "ptr", dhDC)
+        if BufferByteAccess.HasMethod("Dispose")
+            BufferByteAccess.Dispose()
+        if MemoryBuffer.HasMethod("Dispose")
+            MemoryBuffer.Dispose()
         BufferByteAccess := "", ObjRelease(MemoryBufferReference), MemoryBuffer := "", ObjRelease(BitmapBuffer) ; Release in correct order
 
         return SoftwareBitmap
