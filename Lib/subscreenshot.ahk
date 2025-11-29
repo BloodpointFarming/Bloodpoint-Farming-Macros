@@ -23,7 +23,7 @@ class Subscreenshot {
     static of(x, y, w, h) => Subscreenshot(x, y, PBitmapImage.of(x, y, w, h), dbdWindow.width, dbdWindow.height)
 
     /**
-     * Catures a screenshot enclosing the provided Coords and passes it to the provided function.
+     * Captures a screenshot enclosing the provided Coords and passes it to the provided function.
      */
     static enclose(points, f) {
         xMin := 99999
@@ -43,11 +43,9 @@ class Subscreenshot {
         w := xMax - xMin + 1
         h := yMax - yMin + 1
         s := Subscreenshot(x, y, PBitmapImage.of(x, y, w, h), dbdWindow.width, dbdWindow.height)
-        try {
-            return f.Call(s)
-        } finally {
-            s.dispose()
-        }
+        
+        return f.Call(s)
+        
     }
 
     /**
