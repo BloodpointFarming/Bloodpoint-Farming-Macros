@@ -43,9 +43,8 @@ class Subscreenshot {
         w := xMax - xMin + 1
         h := yMax - yMin + 1
         s := Subscreenshot(x, y, PBitmapImage.of(x, y, w, h), dbdWindow.width, dbdWindow.height)
-        
+
         return f.Call(s)
-        
     }
 
     /**

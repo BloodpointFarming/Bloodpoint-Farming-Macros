@@ -31,7 +31,7 @@ class AutoUpdate {
             }
 
             ; Mark that we checked for an update so we don't retry for a while
-            FileOverwite(A_Now, this.lastUpdateCheckFile)
+            FileOverwrite(A_Now, this.lastUpdateCheckFile)
 
             newEtag := this.getLatestEtag()
             currentEtag := this.getCurrentEtag()
@@ -49,7 +49,7 @@ class AutoUpdate {
             this.installLatestUpdate()
 
             ; Record the new ETag
-            FileOverwite(newEtag, this.etagFile)
+            FileOverwrite(newEtag, this.etagFile)
 
             logger.debug("Update complete.")
 

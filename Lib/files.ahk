@@ -1,6 +1,6 @@
 #Requires AutoHotkey v2.0
 
-FileOverwite(text, Filename) {
+FileOverwrite(text, Filename) {
     if FileExist(Filename)
         FileDelete(Filename)
     FileAppend(text, Filename)

@@ -46,7 +46,7 @@ class AutoUpdateTests {
         au := LocalSourceAutoUpdate(zipFile)
 
         ; Setup a dummy repo with known files.
-        FileOverwite("original", repoDir "\example.ahk")
+        FileOverwrite("original", repoDir "\example.ahk")
 
         createZip() {
             if FileExist(zipFile)
