@@ -66,6 +66,4 @@ class Subscreenshot {
 
         return color
     }
-
-    dispose() => this.img.dispose()
 }

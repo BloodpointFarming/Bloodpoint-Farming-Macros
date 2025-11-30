@@ -304,7 +304,6 @@ buyMarkedItems() {
     ;     buyItemsAtPoints(bw.innerRing, screenshot)
     ; }
     saveScreenshot(screenshot)
-    screenshot.dispose()
     sw.report()
 }
 
