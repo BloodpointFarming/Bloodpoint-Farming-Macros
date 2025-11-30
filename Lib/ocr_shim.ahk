@@ -29,6 +29,17 @@ ocrShim(opts := 0) {
     durationMs := A_TickCount - start
     logger.debug("OCR took " durationMs " ms")
 
+    containsText(result, needle) {
+        for line in result.Lines {
+            logger.info(line.Text)
+            if InStr(line.Text, needle)
+                return true
+        }
+        return false
+    }
+
+    result.DefineProp("containsText", {Call: containsText})
+
     return result
 }
 

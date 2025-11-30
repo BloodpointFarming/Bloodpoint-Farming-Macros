@@ -110,12 +110,7 @@ isAbandonEscapeOptionVisible() {
     }
     
     result := ocrShim(opts)
-
-    for line in result.Lines {
-        logger.info(line.Text)
-        if RegExMatch(line.Text, "ABANDON")
-            return true
-    }
+    return result.containsText("ABANDON")
 }
 
 isAbandonConfirmOpen() {
