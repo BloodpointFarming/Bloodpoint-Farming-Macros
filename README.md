@@ -12,12 +12,6 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 5. To turn off the macro, open your system tray > right click the macro > Exit
 
 ## General Macros
-### Skip Startup Screens
-- Auto-clicks through the DBD startup screens.
-- Times DBD startup.
-- DBD must be fullscreen and visible.
-- DBD does *not* need to be focused.
-
 ### Autospend
 - F6 to purchase tagged items from the bloodweb using the [fast bloodweb tech](https://www.reddit.com/r/deadbydaylight/s/njguTZBODp).
 - Demo: https://youtu.be/h3Yr9y5W7GU
