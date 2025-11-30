@@ -99,29 +99,23 @@ getBloodwebLevel() {
 }
 
 isAbandonEscapeOptionVisible() {
-    ; Looks for the pure black/white pixels of [ESC] ABANDON button in the top right
-    static topLeft := Coords2K(2182, 74)
-    static botRight := Coords2K(2222, 114)
-    static abandonText := Coords2K(2339, 91)
-    static abandonText2 := Coords2K(2286, 95)
-
-    hasEnoughBlackWhitePixels(sub) {
-        img := sub.img
-        counts := countPureColors(img)
-        ratioBlack := counts.black / img.size()
-        ratioWhite := counts.white / img.size()
-        return ratioBlack > 0.3 and ratioWhite > 0.05
+    xPadding := 5
+    yPadding := 10
+    xStart := 2246
+    opts := {
+        x: scaled.scaleX(xStart - xPadding),
+        y: scaled.scaleY(81 - yPadding),
+        w: scaled.scaleX(2374 - xStart + xPadding),
+        h: scaled.scaleY((101 - 81) + yPadding + yPadding)
     }
+    
+    result := ocrShim(opts)
 
-    if not Subscreenshot.enclose([topLeft, botRight], hasEnoughBlackWhitePixels)
-        return false
-
-    c1 := coords.getColor(abandonText)
-    if not isWhiteish(c1, 0x90, tolerance := 7)
-        return false
-
-    c2 := coords.getColor(abandonText2)
-    return isRgbSimilar(c1, c2, threshold := 2)
+    for line in result.Lines {
+        logger.info(line.Text)
+        if RegExMatch(line.Text, "ABANDON")
+            return true
+    }
 }
 
 isAbandonConfirmOpen() {

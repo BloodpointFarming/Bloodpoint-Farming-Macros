@@ -28,8 +28,7 @@ class SettingsTests {
 
     test_isAbandonEscapeOptionVisible_1440() => assertFor("match\matchAbandonEsc1440.png", isAbandonEscapeOptionVisible.Bind())
     test_isAbandonEscapeOptionVisible_1080() => assertFor("match\matchAbandonEsc1080.png", isAbandonEscapeOptionVisible.Bind())
-    test_isAbandonEscapeOptionVisible_1080_2() => assertFor("match\matchAbandonEsc1080-2.png", isAbandonEscapeOptionVisible.Bind())
-    ; TODO: needs lossless screenshot: ; test_isAbandonEscapeOptionVisible_1440Xbox() => assertFor("match\matchAbandon1440Xbox.png", isAbandonEscapeOptionVisible.Bind())
+    test_isAbandonEscapeOptionVisible_1440Xbox() => assertFor("match\matchAbandon1440Xbox.png", isAbandonEscapeOptionVisible.Bind())
 
     test_isSettingsGraphicsTabSelected_1440() => assertFor("settings\graphics1440.png", isSettingsGraphicsTabSelected.Bind())
     test_isSettingsGraphicsTabSelected_1080() => assertFor("settings\graphics1080.png", isSettingsGraphicsTabSelected.Bind())

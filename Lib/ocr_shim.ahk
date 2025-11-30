@@ -35,4 +35,12 @@ ocrShim(opts := 0) {
 /**
  * Replaced with fake in tests.
  */
-ocrFunction := (opts := 0) => OCR.FromWindow(WinGetID(dbdWinTitle), opts)
+ocrFunction := (opts) => OCRShimFunctions.fromScreen(opts)
+
+class OCRShimFunctions {
+    static fromScreen(opts) {
+        opts.mode := 0 ; possibly unused, but set to a reasonable value for consistency
+        img := capture.of(opts.x, opts.y, opts.w, opts.h)
+        return OCR.FromBitmap(img.pBitmap)
+    }
+}
