@@ -49,16 +49,6 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 - Spams space bar events while the actual space bar is held down.
 - Useful for failing skill checks to regress a generator quickly.
 
-### FPS Switch
-- Quickly switches between 30 & 120 FPS.
-- F3 = Set 30 FPS / F4 = Set 120 FPS
-- UI scale must be 100%.
-
-### FPS Switch (sleep)
-- Slowly switches between 30 & 120 FPS.
-- F3 = Set 30 FPS / F4 = Set 120 FPS
-- This version of the FPS Switch macro can potentially work better for non-standard configurations (shaders, filters, etc).
-
 ### Match Timer
 - A simple match timer that resets when the black bars at the top/bottom of the screen fully disappear.
 - Window is always on top and draggable.
