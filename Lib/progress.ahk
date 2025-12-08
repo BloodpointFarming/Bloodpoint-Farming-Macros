@@ -78,6 +78,10 @@ getProgressPoints.Push(progressBarPoints*)
 getProgressPoints.Push(repairPoints*)
 
 /**
+ * Current gen progress.
+ * 
+ * Takes 3-12 ms on my PC. Median ~5 ms.
+ * 
  * @returns progress bar value from 0 to 1, or -1 if not repairing
  */
 getProgress() {
