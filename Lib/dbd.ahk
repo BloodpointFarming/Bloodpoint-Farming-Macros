@@ -114,13 +114,18 @@ isAbandonEscapeOptionVisible() {
 }
 
 isAbandonConfirmOpen() {
-    ; After we click Abandon, we get a confirmation dialog
-    ; It has a title of ABANDON in pure white
-    global confirmWhiteA := scaled.getColor(1171, 382)
-    global confirmWhiteN := scaled.getColor(1375, 372)
-    a := confirmWhiteA = 0xFFFFFF
-    n := confirmWhiteN = 0xFFFFFF
-    return a and n
+    xPadding := 5
+    yPadding := 10
+    static tl := Coords2K(1772, 1041)
+    static br := Coords2K(1898, 1060)
+    opts := {
+        x: tl.scaledX() - xPadding,
+        y: tl.scaledY() - yPadding,
+        w: br.scaledX() - tl.scaledX() + xPadding + xPadding,
+        h: br.scaledY() - tl.scaledY() + yPadding + yPadding,
+    }
+    result := ocrShim(opts)
+    return result.containsText("ABANDON")
 }
 
 isHookSpaceOptionAvailable() {
