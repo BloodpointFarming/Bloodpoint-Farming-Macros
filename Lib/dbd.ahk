@@ -99,32 +99,19 @@ getBloodwebLevel() {
 }
 
 isAbandonEscapeOptionVisible() {
-    xPadding := 5
-    yPadding := 10
-    xStart := 2246
-    opts := {
-        x: scaled.scaleX(xStart - xPadding),
-        y: scaled.scaleY(81 - yPadding),
-        w: scaled.scaleX(2374 - xStart + xPadding),
-        h: scaled.scaleY((101 - 81) + yPadding + yPadding)
-    }
-    
-    result := ocrShim(opts)
+    static tl := Coords2K(2246, 81)
+    static br := Coords2K(2374, 101)
+
+    result := OcrShim.fromRect(tl, br)
     return result.containsText("ABANDON")
 }
 
 isAbandonConfirmOpen() {
-    xPadding := 5
-    yPadding := 10
+    ; Abandon button
     static tl := Coords2K(1772, 1041)
     static br := Coords2K(1898, 1060)
-    opts := {
-        x: tl.scaledX() - xPadding,
-        y: tl.scaledY() - yPadding,
-        w: br.scaledX() - tl.scaledX() + xPadding + xPadding,
-        h: br.scaledY() - tl.scaledY() + yPadding + yPadding,
-    }
-    result := ocrShim(opts)
+
+    result := OcrShim.fromRect(tl, br)
     return result.containsText("ABANDON")
 }
 
