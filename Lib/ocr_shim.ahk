@@ -16,6 +16,9 @@ class OcrShim {
     static Call(opts := 0) {
         static MinImageDimension := 40
 
+        if opts == 0
+            opts := {}
+
         ; Expand dimensions to prevent OCR from silently failing.
         if opts.HasProp("w") and opts.w < MinImageDimension
             opts.w := MinImageDimension
@@ -32,8 +35,9 @@ class OcrShim {
 
         containsText(result, needle) {
             for line in result.Lines {
-                logger.info(line.Text)
-                if InStr(line.Text, needle)
+                text := Trim(line.Text)
+                normalized := OcrShim.NormalizeAccents(text)
+                if InStr(normalized, needle, false)
                     return true
             }
             return false
@@ -59,6 +63,24 @@ class OcrShim {
         opts.w := br.scaledX() - tl.scaledX() + xPadding + xPadding
         opts.h := br.scaledY() - tl.scaledY() + yPadding + yPadding
         return OcrShim(opts)
+    }
+
+    /**
+     * Normalizes accented characters to their base ASCII equivalents.
+     */
+    static NormalizeAccents(text) {
+        ; Common accented characters that OCR misrecognizes
+        static accents := Map(
+            "Å", "A", "Ä", "A", "Ö", "O", "Ü", "U",
+            "å", "a", "ä", "a", "ö", "o", "ü", "u",
+            "Á", "A", "É", "E", "Í", "I", "Ó", "O", "Ú", "U",
+            "á", "a", "é", "e", "í", "i", "ó", "o", "ú", "u",
+            "Ñ", "N", "ñ", "n"
+        )
+        normalized := ""
+        Loop Parse, text
+            normalized .= accents.Has(A_LoopField) ? accents[A_LoopField] : A_LoopField
+        return normalized
     }
 }
 
