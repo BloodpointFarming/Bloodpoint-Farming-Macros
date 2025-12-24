@@ -8,6 +8,7 @@
 #Include images.ahk
 #Include logging.ahk
 #Include perf.ahk
+#Include pixel_check.ahk
 #Include retries.ahk
 #Include scaling.ahk
 #Include stopwatch.ahk

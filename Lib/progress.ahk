@@ -32,7 +32,7 @@ isToolboxRepairPoints := [toolboxRepairRWhite, toolboxRepairTWhite]
 /**
  * @returns true if we are repairing a gen with a toolbox
  */
-isToolboxRepair() => Subscreenshot.enclose(isToolboxRepairPoints, (api) => isToolboxRepairFrom(api))
+isToolboxRepair() => isToolboxRepairFrom(Subscreenshot.ofPoints(isToolboxRepairPoints))
 
 /**
  * @returns true if we are repairing a gen with a toolbox
@@ -59,7 +59,7 @@ repairPoints := [toolboxRepairRWhite, toolboxRepairTWhite, repairE, repairA]
 isRepairingFrom(img) => isNormalRepair(img) or isToolboxRepairFrom(img)
 isRepairing() {
     static rect := getBoundingRect(repairPoints)
-    return Subscreenshot.enclose(rect, (img) => isRepairingFrom(img))
+    return isRepairingFrom(Subscreenshot.ofPoints(rect))
 }
 
 progressBarYTop := 1155
@@ -86,7 +86,7 @@ getProgressPoints.Push(repairPoints*)
  */
 getProgress() {
     static rect := getBoundingRect(getProgressPoints)
-    return Subscreenshot.enclose(rect, (img) => getProgressFrom(img))
+    return getProgressFrom(Subscreenshot.ofPoints(rect))
 }
 
 getProgressFrom(img) {

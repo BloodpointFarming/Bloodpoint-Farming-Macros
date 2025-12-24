@@ -23,9 +23,12 @@ class Subscreenshot {
     static of(x, y, w, h) => Subscreenshot(x, y, PBitmapImage.of(x, y, w, h), dbdWindow.width, dbdWindow.height)
 
     /**
-     * Captures a screenshot enclosing the provided Coords and passes it to the provided function.
+     * Screenshots the Coords with proper scaling to the DBD window size.
+     * 
+     * @param points Coords to be enclosed
+     * @returns {Subscreenshot} captured image enclosing the points
      */
-    static enclose(points, f) {
+    static ofPoints(points) {
         xMin := 99999
         yMin := 99999
         xMax := 0
@@ -42,9 +45,27 @@ class Subscreenshot {
         y := yMin
         w := xMax - xMin + 1
         h := yMax - yMin + 1
-        s := Subscreenshot(x, y, PBitmapImage.of(x, y, w, h), dbdWindow.width, dbdWindow.height)
+        return Subscreenshot(x, y, PBitmapImage.of(x, y, w, h), dbdWindow.width, dbdWindow.height)
+    }
 
-        return f.Call(s)
+    /**
+     * Evaluates the PixelCheck by capturing a screenshot of the whole bounding rectangle.
+     * 
+     * Compared to checking points individually (e.g. pixelCheck.Call(coords)), the screenshot method:
+     * - 👍 evaluates faster (wall time)
+     * - 👎 uses slightly more CPU/check, especially for sparse points.
+     * 
+     * Consider using pixelCheck.Call(coords) instead for polling.
+     */
+    static check(pixelCheck) {
+        points := pixelCheck.points()
+
+        if points.Length <= 1 {
+            return pixelCheck(coords)
+        } else {
+            img := Subscreenshot.ofPoints(points)
+            return pixelCheck.Call(img)
+        }
     }
 
     /**

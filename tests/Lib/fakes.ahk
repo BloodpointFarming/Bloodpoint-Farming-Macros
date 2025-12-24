@@ -120,4 +120,5 @@ assertFor(screenshot, predicate) {
     pBitmap := setupFakeWindow(screenshotPath)
     Yunit.Assert(predicate.Call())
     Gdip_DisposeImage(pBitmap)
+    return true
 }

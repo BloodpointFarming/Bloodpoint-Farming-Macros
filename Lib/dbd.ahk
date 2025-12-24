@@ -5,6 +5,7 @@
 #Include coords.ahk
 #Include images.ahk
 #Include ocr_shim.ahk
+#Include pixel_check.ahk
 #Include subscreenshot.ahk
 
 isDbdFinishedLoading() {
@@ -138,15 +139,15 @@ tallyRightArrowDark := Coords2K(872, 1194)
 tallyContinueButtonRed := Coords2K(2424, 1348)
 
 isTallyScreen() {
-    isLeftArrowWhiteish() => isWhiteish(coords.getColor(tallyLeftArrowWhite))
-    isLeftArrowBlackish() => isBlackish(coords.getColor(tallyLeftArrowDark), , tolerance := 10)
+    static check := PixelCheck.ForAll(
+        PixelCheck(tallyLeftArrowWhite, (c) => isWhiteish(c)),
+        PixelCheck(tallyLeftArrowDark, (c) => isBlackish(c, , tolerance := 10)),
+        PixelCheck(tallyRightArrowWhite, (c) => isWhiteish(c)),
+        PixelCheck(tallyRightArrowDark, (c) => isBlackish(c, , tolerance := 10)),
+        PixelCheck(tallyContinueButtonRed, (c) => isRedish(c))
+    )
 
-    isRightArrowWhite() => isWhiteish(coords.getColor(tallyRightArrowWhite))
-    isRightArrowBlackish() => isBlackish(coords.getColor(tallyRightArrowDark), , tolerance := 10)
-
-    isContinueButtonRedish() => isRedish(coords.getColor(tallyContinueButtonRed))
-
-    return isLeftArrowWhiteish() && isLeftArrowBlackish() && isRightArrowWhite() && isRightArrowBlackish() && isContinueButtonRedish()
+    return check(coords)
 }
 
 tallyScoreMatchText := Coords2K(158, 630)
@@ -164,7 +165,7 @@ isReadyButtonVisible() {
 isQVisible() {
     topLeft := Coords2K(392, 1113)
     botRight := Coords2K(432, 1156)
-    counts := Subscreenshot.enclose([topLeft, botRight], (s) => countPureColors(s.img))
+    counts := countPureColors(Subscreenshot.ofPoints([topLeft, botRight]).img)
     ratioBlack := counts.black / counts.size
     return ratioBlack > 0.3 and counts.white >= 2
 }
