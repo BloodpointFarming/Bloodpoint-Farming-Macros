@@ -8,5 +8,7 @@ class Stopwatch {
     __New(label) {
         this.label := label
     }
-    report() => logger.info(this.label " took " Format("{:.3f}", qpcTicksToSeconds(qpcGetTicks() - this.start) * 1000) " ms.")
+    elapsedMs() => qpcTicksToSeconds(qpcGetTicks() - this.start) * 1000
+    toString() => this.label " took " Format("{:.3f}", this.elapsedMs()) " ms."
+    report() => logger.info(this.toString())
 }
