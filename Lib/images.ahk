@@ -52,5 +52,36 @@ class PBitmapImage {
      */
     size() => this.height * this.width
 
+    /**
+     * Enumerator for all pixels in the image, e.g. for x, y, color in img {...}
+     * 
+     * Implementation is SLOW.
+     * ~10s to fully iterate a 2560x1440 image.
+     */
+    __Enum(varCount) {
+        if varCount != 3
+            throw Error("Expected 3 variables for iteration (x, y, color)")
+
+        x := 0, y := 0
+        w := this.width, h := this.height, s := this.stride, p := this.scan0
+        jump := s - w * 4
+
+        Enumerator(&ox, &oy, &oc) {
+            if y >= h
+                return false
+
+            ox := x, oy := y
+            oc := NumGet(p, "UInt") & 0xFFFFFF
+
+            p += 4
+            if ++x >= w {
+                x := 0, ++y, p += jump
+            }
+            return true
+        }
+
+        return Enumerator
+    }
+
     static of(x, y, w, h) => capture.of(x, y, w, h)
 }
