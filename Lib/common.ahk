@@ -13,6 +13,7 @@
 #Include scaling.ahk
 #Include stopwatch.ahk
 #Include subscreenshot.ahk
+#Include tooltips.ahk
 
 #SingleInstance
 Persistent

@@ -2,14 +2,22 @@
 
 #Include Lib\common.ahk
 #Include Lib\gdip.ahk
+#Include Lib\ocr_shim.ahk
+#Include Lib\tally.ahk
 
 /**
  * Captures the tabs of the Tally screen as a single screenshot.
  */
 
+/**
+ * Turn off all the automatic stuff.
+ * Only interact with tally screen via keybinds.
+ */
+debugMode := false
+
 config := {
     ; Click the continue button?
-    continue: false,
+    continue: not debugMode,
     ; How long to wait before clicking continue? User can wiggle mouse to cancel.
     continueGracePeriodMs: 3000,
     ; How often to check? Responsiveness vs load.
@@ -28,7 +36,7 @@ config := {
         ; Fairly slow, but enabled by default since it's useful to track match times.
         ; Killer times should be considered authoritative.
         ; Survivors may escape LONG before the match ends, which doesn't matter since they still have to wait for the killer to requeue.
-        xp: false,
+        xp: true,
         ; "Does this build pip?" Unimportant for BP farming, so disabled by default.
         ; Useful for analyzing builds.
         ; Adds 700 ms.
@@ -45,6 +53,27 @@ config := {
         ; 540 px is equivalent to 720p rendered resolution
         maxWidth: 540
     },
+    display: {
+        ; Should we display tooltips for parsed info? (e.g. match duration)
+        tooltipsEnabled: true,
+        ; How long to display tooltips?
+        tooltipDurationMs: 20000,
+    },
+    debugging: {
+        ; Should we watch for the tally screen at all? Can disable during debugging.
+        timerEnabled: not debugMode,
+        /**
+         * Block the mouse while clicking around?
+         */
+        blockMouse: not debugMode,
+    }
+}
+
+tooltips := {
+    matchTime: ToolTipInstance(
+        Integer((dbdWindow.width / 2) - 20),
+        Integer(dbdWindow.height * 0.02)
+    )
 }
 
 setTrayIcon("icons\tally.ico")
@@ -60,12 +89,21 @@ CheckTallyScreen() {
         return
 
     if isTallyScreen() {
-        withMouseBlocked(captureImages)
+        ; Prevent new SetTimer tasks from interrupting until we finish moving through the DBD tally screen.
+        Critical(true)
+        if config.debugging.blockMouse
+            withMouseBlocked(captureImages)
+        else
+            captureImages()
+
         focusChatBox()
         SetTimer(deleteOldestScreenshots, -100, Priority := -1) ; off the critical path
 
         if (config.continue)
             clickContinueWithDelay()
+
+        ; Done with DBD interactions.
+        Critical(false)
 
         queueTimerRestart()
     }
@@ -75,7 +113,9 @@ chatBox := Coords2K(2000, 1120)
 focusChatBox() => coords.click(chatBox)
 
 startTimer() {
-    global config
+    if not config.debugging.timerEnabled
+        return
+
     if isTallyScreen() {
         ; Don't take more screenshots if we're still in Tally.
         logger.info("Tally screen still visible.")
@@ -87,13 +127,16 @@ startTimer() {
 }
 
 queueTimerRestart() {
+    if not config.debugging.timerEnabled
+        return
+
     SetTimer(CheckTallyScreen, 0) ; cancel timer
     SetTimer(startTimer, -config.timerRestartMs) ; delay restarting the timer
     logger.info("Paused watching Tally screen for " config.timerRestartMs " ms")
 }
 
 captureImages() {
-    global tabIndex, config
+    global tabIndex
     matchXp := 0, scoreTop := 0, scoreBottom := 0, scoreboard := 0, emblems := 0, emblemsGradeProgress := 0, scoreMatchTotal := 0
     captureStartTime := A_TickCount
 
@@ -106,21 +149,40 @@ captureImages() {
     ; Scoreboard
     if config.capture.scoreboard {
         switchToTab(-1)
-        Sleep 350
+        Interruptible(() => Sleep(350))
         scoreboard := screenshot(76, 362, width, 772)
     }
 
     ; Match XP / Player Level
     if config.capture.xp {
         switchToTab(-2)
+        ; DO NOT YIELD! Timing must be precise to capture "MATCH XP" before it disappears.
         Sleep 1500 ; 87 frames@60fps from click to Match XP (1.45 seconds)
-        matchXp := screenshot(76, 918, width, 68)
+        matchXp := captureXp()
+
+        if config.display.tooltipsEnabled {
+            displayMatchTime() {
+                totalSeconds := getMatchSecondsFromXp(matchXp)
+                if totalSeconds {
+                    ; Format as m:ss
+                    m := Integer(totalSeconds / 60)
+                    s := Mod(totalSeconds, 60)
+                    duration := m ":" Format("{:02i}", s)
+
+                    tooltips.matchTime.setText(duration " ⏱️", config.display.tooltipDurationMs)
+                } else {
+                    logger.warn("Could not determine match length from XP")
+                }
+            }
+
+            SetTimer(displayMatchTime, -1)
+        }
     }
 
     ; Score
     if config.capture.bloodpoints {
         switchToTab(0)
-        waitUntil("isTallyBloodpointsScreen", 1500)
+        Interruptible(() => waitUntil("isTallyBloodpointsScreen", 1500))
         left := 65
         scoreTop := screenshot(left, 301, width, 18, padding := 10)
         scoreBottom := screenshot(left, 541, width, 29, padding := 10)
@@ -132,7 +194,7 @@ captureImages() {
         switchToTab(1)
         switchToTab(0)
         switchToTab(1)
-        Sleep 450
+        Interruptible(() => Sleep(450))
         ; Slice through the middle since they're so large
         emblems := screenshot(76, 369, width, 117)
         emblemsGradeProgress := screenshot(76, 566, width, 18, padding := 5)
@@ -143,7 +205,7 @@ captureImages() {
     if !(config.continue and config.continueGracePeriodMs = 0)
         switchToTab(-1) ; Display other player names, status, scores while we wait.
 
-    ; Composite images vertically
+    ; Composite images vertically in a pleasing order.
     images := [emblems, emblemsGradeProgress, matchXp, scoreTop, scoreBottom, scoreboard, scoreMatchTotal]
 
     ; Remove all 0 values from images array
@@ -155,9 +217,6 @@ captureImages() {
 
     composite := compositeImages(images)
 
-    for img in images
-        Gdip_DisposeImage(img)
-
     dir := EnvGet("USERPROFILE") "\Pictures\dbd-matches"
     if !DirExist(dir)
         DirCreate(dir)
@@ -168,14 +227,12 @@ captureImages() {
 }
 
 compositeImages(images) {
-    global config
-
     ; Figure out dimensions
     totalWidth := 0
     totalHeight := 0
     for img in images {
-        totalWidth := Max(totalWidth, Gdip_GetImageWidth(img))
-        totalHeight += Gdip_GetImageHeight(img)
+        totalWidth := Max(totalWidth, img.width)
+        totalHeight += img.height
     }
 
     ; Create and draw into composite image
@@ -184,8 +241,9 @@ compositeImages(images) {
 
     yOffset := 0
     for img in images {
-        Gdip_DrawImage(g, img, 0, yOffset, Gdip_GetImageWidth(img), Gdip_GetImageHeight(img))
-        yOffset += Gdip_GetImageHeight(img)
+        img.unlock() ; Gdip_DrawImage silently fails when locked.
+        Gdip_DrawImage(g, img.pBitmap, 0, yOffset, img.width, img.height)
+        yOffset += img.height
     }
     Gdip_DeleteGraphics(g)
 
@@ -202,30 +260,6 @@ compositeImages(images) {
     }
 
     return composite
-}
-
-/**
- * Scales the coords to the current window size and captures a screenshot.
- */
-screenshot(x, y, w, h, padding := 0) {
-    ; Apply padding
-    h := h + padding * 2
-    y -= padding
-
-    ; Apply scaling
-    x := scaled.scaleX(x)
-    y := scaled.scaleY(y)
-    w := scaled.scaleX(w)
-    h := scaled.scaleY(h)
-
-    hwnd := WinExist(dbdWinTitle)
-    ; There is no Gdip function to capture a window, so
-    ; we have to find the window client area relative to the screen.
-    pt := Buffer(8, 0)
-    DllCall("ClientToScreen", "ptr", hwnd, "ptr", pt)
-    wx := NumGet(pt, 0, "int")
-    wy := NumGet(pt, 4, "int")
-    return Gdip_BitmapFromScreen(wx + x "|" wy + y "|" w "|" h)
 }
 
 /**

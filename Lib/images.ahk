@@ -8,21 +8,27 @@
  * A dumb screenshot with no knowledge of dbd window size or scaling.
  */
 class PBitmapImage {
+    /**
+     * Locking the image allows getColor() calls,
+     * but prevents reading for copying, e.g. Gdip_DrawImage(g, img).
+     */
     __New(pBitmap) {
         if pBitmap = 0
             throw Error("pBitmap == 0")
 
         width := 0, height := 0, stride := 0, scan0 := 0, bitmapData := Buffer(64)
+        this.pBitmap := pBitmap
 
         ; https://chatgpt.com/share/685670be-6a20-8010-ac87-8f904568c1ca
         Gdip_GetImageDimensions(pBitmap, &width, &height)
+        this.width := width
+        this.height := height
+
+        this.isLocked := true
         Gdip_LockBits(pBitmap, 0, 0, width, height, &stride, &scan0, &bitmapData)
-        this.pBitmap := pBitmap
         this.bitmapData := bitmapData
         this.stride := stride
         this.scan0 := scan0
-        this.width := width
-        this.height := height
     }
 
     getColor(x, y) {
@@ -40,10 +46,17 @@ class PBitmapImage {
 
     __Delete() {
         if this.pBitmap != 0 {
-            data := this.bitmapData
-            Gdip_UnlockBits(this.pBitmap, &data)
+            this.unlock()
             Gdip_DisposeImage(this.pBitmap)
             this.pBitmap := 0
+        }
+    }
+
+    unlock() {
+        if this.isLocked {
+            data := this.bitmapData
+            Gdip_UnlockBits(this.pBitmap, &data)
+            this.isLocked := false
         }
     }
 

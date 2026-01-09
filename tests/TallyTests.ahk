@@ -2,9 +2,7 @@
 
 #Include Lib\test_includes.ahk
 #Include Lib\fakes.ahk
-#Include ..\Lib\gdip.ahk
-#Include ..\Lib\dbd.ahk
-#Include ..\Lib\scaling.ahk
+#Include ..\Lib\tally.ahk
 
 if (A_ScriptFullPath = A_LineFile)
     Yunit
@@ -13,4 +11,5 @@ if (A_ScriptFullPath = A_LineFile)
 
 class TallyTests {
     test_isTallyScreen_Bloodpoints1440() => assertFor("tally\tallyBloodpoints1440.png", isTallyScreen.Bind())
+    test_xp() => assertFor("tally\xp.jpg", () => assertEquals(144, getMatchSecondsFromXp(captureXp())))
 }

@@ -13,10 +13,12 @@ assertEquals(expected, actual) {
     if actual != expected {
         throw Error("FAIL: " actual " != " expected, -2)
     }
+    return true
 }
 
 assertMatch(haystack, regex) {
     if not RegExMatch(haystack, regex) {
         throw Error("FAIL: did not find " regex " in " haystack, -2)
     }
+    return true
 }
