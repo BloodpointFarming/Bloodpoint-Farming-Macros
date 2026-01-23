@@ -6,83 +6,83 @@ setTrayIcon("icons/shuffle.ico")
 ; Dances forward and backwards in place, maintaining chase with survivors.
 ; Stops automatically if DBD loses focus or any of WASD are pressed.
 
-IsSDown := false
-IsWDown := false
+IsEnabled := false
 
-; Start dancing
 #HotIf WinActive(dbdWinTitle)
-~F2::
-{
+$~F2:: {
     global
-    IsEnabled := true
+    logger.info("F2")
+    if IsEnabled {
+        disable()
+
+        KeyWait "F2" ; Do not handle any more F2 events until released.
+    } else {
+        /**
+         * Wait for the F2 key to be released before triggering any Send events.
+         * If Send events happen while F2 is down, AHK may never see the F2 up event,
+         * which would disregard all future F2 presses.
+         */
+        KeyWait "F2"
+
+        ; Start dancing
+        IsEnabled := true
+        SetTimer(shuffle, -1)
+    }
+}
+
+shuffle() {
     loop {
-        if (!IsEnabled)
+        if !IsEnabled
             break
 
-        holdKey("w", 100, &IsWDown)
-        holdKey("s", 100, &IsSDown)
+        holdKey("w", 100)
+        holdKey("s", 100)
     }
 }
 
-holdKey(key, holdTime, &isKeyDown) {
-    global
-    ; If DBD loses focus, stop. Don't spam "wswsws" to other windows.
-
-    if (!dbdWindow.isActive()) {
-        disable()
-        return
-    }
+holdKey(key, holdTime) {
     if (!IsEnabled)
         return
 
-    ; Send the key down event
-    SendInput("{" key " down}")
-    isKeyDown := true
-    Sleep(holdTime)  ; Hold the key down for the specified time
-
-    if (!IsEnabled)
-        return
-    ; Reset key state and send key up event
-    isKeyDown := false
-    SendInput("{" key " up}")
+    sendIfEnabled("{" key " down}")
+    Sleep(holdTime)
+    sendIfEnabled("{" key " up}")
 }
 
-; WASD key down handlers with pass-through
-; WS need special handling.
-; For example, we do not want to send W up if the user starts holding W.
-~w::
-{
-    disable()
-    resetS()
-}
-~s::
-{
-    disable()
-    resetW()
-}
-~a::
-~d::
-{
-    disable()
-    resetW()
-    resetS()
-}
-
-resetW() {
-    global
-    if (IsWDown) {
-        SendInput("{w up}")
-        IsWDown := false
+sendIfEnabled(event) {
+    Critical
+    if IsEnabled {
+        if dbdWindow.isActive()
+            Send(event)
+        else
+            disable()
     }
+    Critical('Off')
 }
-resetS() {
-    global
-    if (IsSDown) {
-        SendInput("{s up}")
-        IsSDown := false
-    }
-}
+
+; Cancel with WASD.
+; "$": prevent script from triggering the keybind with send events
+; "~": pass through the hotkey event.
+#HotIf dbdWindow.isActive() and IsEnabled
+$~w::
+$~s::
+$~a::
+$~d:: disable()
+
 disable() {
     global
+    Critical
     IsEnabled := false
+    releaseKeys()
+    Critical('Off')
+}
+
+releaseKeys() {
+    ; WS need special handling.
+    ; For example, we do not want to send W up if the user starts holding W.
+    for key in ["w", "s"] {
+        if GetKeyState(key) and not GetKeyState(key, "P") {
+            Send("{" key " up}")
+        }
+    }
 }
