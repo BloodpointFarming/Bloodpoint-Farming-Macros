@@ -40,16 +40,19 @@ CheckMatchStart()
     blackBottom := true
     sampleCount := 5
 
-    ; Sample multiple evenly spaced pixels from top and bottom bars
+    ; Only check the top center. Some use FPS overlays in top right/left
+    topColor := PixelGetColor(screenWidth // 2, (barHeight // 2))
+    if (topColor != 0x000000)
+        blackTop := false
+
+    ; Sample multiple evenly spaced pixels from bottom bar
     Loop sampleCount
     {
         x := Round(screenWidth * (A_Index / (sampleCount + 1)))
 
-        topColor := PixelGetColor(x, (barHeight // 2))
+
         bottomColor := PixelGetColor(x, (screenHeight - barHeight // 2))
 
-        if (topColor != 0x000000)
-            blackTop := false
         if (bottomColor != 0x000000)
             blackBottom := false
     }
