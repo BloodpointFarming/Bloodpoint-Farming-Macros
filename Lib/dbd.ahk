@@ -156,10 +156,29 @@ isTallyBloodpointsScreen() => isWhiteish(coords.getColor(tallyScoreMatchText), t
 cancelButtonRedMarker := Coords2K(2433, 1283)
 isReadiedUp() => isRedish(coords.getColor(cancelButtonRedMarker))
 
-readyButtonRedBar := Coords2K(2430, 1257)
-readyButtonWhiteR := Coords2K(2278, 1260)
 isReadyButtonVisible() {
-    return isRedish(coords.getColor(readyButtonRedBar)) and isWhiteish(coords.getColor(readyButtonWhiteR), threshold := 0x90)
+    static y := 1257
+    static readyButtonRedBar := Coords2K(2430, y)
+    static xWhiteish := [2283, 2304, 2330, 2356, 2390]
+    static xNotWhiteish := [2297, 2323, 2337, 2363, 2381]
+    static screenshotBounds := [Coords2K(2283, y), Coords2K(2430, y)]
+
+    ss := Subscreenshot.ofPoints(screenshotBounds)
+
+    if not isRedish(ss.getColor(readyButtonRedBar))
+        return false
+
+    for x in xWhiteish {
+        if not isWhiteish(ss.getColor(Coords2K(x, y)), threshold := 0x90)
+            return false
+    }
+
+    for x in xNotWhiteish {
+        if isWhiteish(ss.getColor(Coords2K(x, y)), threshold := 0x90)
+            return false
+    }
+
+    return true
 }
 
 isQVisible() {

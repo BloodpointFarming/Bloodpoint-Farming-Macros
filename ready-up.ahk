@@ -41,6 +41,7 @@ readyUp() {
     MouseMove(initialX, initialY, 0)
 }
 
+readyButtonWhiteR := Coords2K(2278, 1260)
 clickReadyButton() {
     coords.mouseMove(readyButtonWhiteR)
     Sleep(20)
