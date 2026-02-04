@@ -20,7 +20,9 @@ tagTypes := ["Items", "ItemAddons", "Favors"]
 ; Clean slate
 for color in colors {
     root := "C:\Program Files (x86)\Steam\steamapps\common\Dead by Daylight\DeadByDaylight\Content\UI\Icons - " color
-    DirDelete root, True
+    if DirExist(root)
+        DirDelete root, True
+    
     for tagType in tagTypes {
         DirCreate root "\" tagType
     }
