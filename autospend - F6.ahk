@@ -11,7 +11,7 @@ https://www.reddit.com/r/deadbydaylight/s/njguTZBODp
 setTrayIcon("icons/autopurchase.ico")
 
 /**
- * Enables additional info and screnshot capturing.
+ * Enables additional info and screenshot capturing.
  */
 debug := false
 
@@ -25,6 +25,13 @@ useAutopurchase := true
  * Uses the bulk spend between level 50 and 10.
  */
 useBulkSpend := true
+
+/**
+ * Should we use the fast bloodweb tech?
+ * In some versions of the game, this causes DBD to bug out until restarted.
+ */
+useBloodwebCycling := false
+
 bulkSpendToLevel := 10
 
 bw := Bloodweb([], [], [])
@@ -200,7 +207,7 @@ autoPurchase() {
         action := clickAutopurchase,
         predicate := isAutoPurchaseComplete,
         maxDurationMs := 10000,
-        timeBetweenRetries := 500
+        timeBetweenRetries := 300
     )
 }
 
@@ -380,10 +387,16 @@ setBloodwebSize() {
 
 cycleBloodweb() {
     ; Closing and opening the bloodweb skips the "level" interstitial
-    logger.info("Cycling bloodweb")
-    coords.click(bloodwebTab) ; bloodweb tab
-    Sleep(100)
-    coords.click(bloodwebTab) ; bloodweb tab
+    if useBloodwebCycling {
+        logger.info("Cycling bloodweb")
+        coords.click(bloodwebTab) ; bloodweb tab
+        Sleep(100)
+        coords.click(bloodwebTab)
+    } else {
+        logger.info("Waiting for bloodweb to fully appear")
+        ; This appears to be required to prevent the next section from autoclicking immediately. Didn't look into why.
+        Sleep(1000)
+    }
 }
 
 slowClick(p, holdTime := 50) {
