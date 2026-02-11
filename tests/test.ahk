@@ -6,6 +6,7 @@
 #Include PregameTests.ahk
 #Include QTests.ahk
 #Include SettingsTests.ahk
+#Include StringsTests.ahk
 #Include TallyTests.ahk
 
 Yunit
@@ -18,5 +19,6 @@ Yunit
         PregameTests,
         QTests,
         SettingsTests,
+        StringsTests,
         TallyTests,
     )

@@ -28,7 +28,8 @@ class YunitOutputDebug{
 		if Result is Error
 		{
 			this.tests.fail := this.tests.fail + 1
-			Details := " (" Result.Message ") [" result.file ":" Result.Line "]"
+			extra := Result.HasOwnProp("Extra") ? " (" Result.Extra ")" : ""
+			Details := " (" Result.Message extra ") [" result.file ":" Result.Line "]"
 			Status := "FAIL"
 		} else {
 			this.tests.pass := this.tests.pass + 1

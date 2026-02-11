@@ -6,12 +6,14 @@
 #Include constants.ahk
 #Include dbd.ahk
 #Include images.ahk
+#Include keybind.ahk
 #Include logging.ahk
 #Include perf.ahk
 #Include pixel_check.ahk
 #Include retries.ahk
 #Include scaling.ahk
 #Include stopwatch.ahk
+#Include strings.ahk
 #Include subscreenshot.ahk
 #Include tooltips.ahk
 

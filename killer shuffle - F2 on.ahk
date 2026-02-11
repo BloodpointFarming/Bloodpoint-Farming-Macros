@@ -7,6 +7,7 @@ setTrayIcon("icons/shuffle.ico")
 ; Stops automatically if DBD loses focus or any of WASD are pressed.
 
 IsEnabled := false
+Killer := KeyBind.Killer
 
 #HotIf WinActive(dbdWinTitle)
 $~F2:: {
@@ -34,9 +35,9 @@ shuffle() {
     loop {
         if !IsEnabled
             break
-
-        holdKey("w", 100)
-        holdKey("s", 100)
+        
+        holdKey(Killer.moveForward, 100)
+        holdKey(Killer.moveBack, 100)
     }
 }
 
@@ -44,9 +45,9 @@ holdKey(key, holdTime) {
     if (!IsEnabled)
         return
 
-    sendIfEnabled("{" key " down}")
+    sendIfEnabled("{" key.rawKey " down}")
     Sleep(holdTime)
-    sendIfEnabled("{" key " up}")
+    sendIfEnabled("{" key.rawKey " up}")
 }
 
 sendIfEnabled(event) {
@@ -80,7 +81,8 @@ disable() {
 releaseKeys() {
     ; WS need special handling.
     ; For example, we do not want to send W up if the user starts holding W.
-    for key in ["w", "s"] {
+    for bind in [Killer.moveForward, Killer.moveBack] {
+        key := bind.rawKey
         if GetKeyState(key) and not GetKeyState(key, "P") {
             Send("{" key " up}")
         }

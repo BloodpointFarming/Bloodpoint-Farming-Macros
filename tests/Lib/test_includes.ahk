@@ -9,6 +9,7 @@
 
 logger := TestLogger()
 
+assert(value, params*) => Yunit.Assert(value, params*)
 assertEquals(expected, actual) {
     if actual != expected {
         throw Error("FAIL: " actual " != " expected, -2)
