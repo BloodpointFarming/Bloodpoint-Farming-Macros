@@ -2,6 +2,7 @@
 
 #Include images.ahk
 #Include scaling.ahk
+#Include coords.ahk
 
 /**
  * Screenshots a sub-section of the screen.
@@ -77,14 +78,22 @@ class Subscreenshot {
      * Gets the color using coordinates relative to the whole DBD window at some arbitrary scale.
      * The coords will be rescaled to the active window.
      */
-    getColor(point) {
-        scaledX := Round(point.x * this.fullWidth / point.width)
-        scaledY := Round(point.y * this.fullHeight / point.height)
+    getColor(point, retries := 1) {
+        try {
+            scaledX := Round(point.x * this.fullWidth / point.width)
+            scaledY := Round(point.y * this.fullHeight / point.height)
 
-        color := this.getColorLiteral(scaledX, scaledY)
+            color := this.getColorLiteral(scaledX, scaledY)
 
-        logger.trace("getColor(" point.x ", " point.y ") => (" scaledX ", " scaledY ")=" Format("{:06X}", color))
+            logger.trace("getColor(" point.x ", " point.y ") => (" scaledX ", " scaledY ")=" Format("{:06X}", color))
 
-        return color
+            return color
+        } catch Error as e {
+            ; corner case: window size can change between coords detection and 
+            if retries = 0
+                throw e
+            else
+                this.getColor(point, retries - 1)
+        }
     }
 }
