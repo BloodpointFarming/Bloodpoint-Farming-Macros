@@ -43,7 +43,9 @@ abandonMatch() {
 
     if not doWithRetriesUntilF(
         clickSettingsAbandonButton,
-        isAbandonConfirmOpen
+        isAbandonConfirmOpen,
+        maxDurationMs := 1000,
+        timeBetweenRetries := 100
     )
         return
 
