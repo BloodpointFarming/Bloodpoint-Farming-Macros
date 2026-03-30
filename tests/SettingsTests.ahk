@@ -8,11 +8,12 @@
 
 if (A_ScriptFullPath = A_LineFile)
     Yunit
-        .Use(YunitJUnit, YunitOutputDebug, YunitStdOut, YunitExitOnTestFailure, YunitWindow)
+        .Use(YunitJUnit, YunitOutputDebug, YunitStdOut, YunitExitOnTestFailure)
         .Test(SettingsTests)
 
 class SettingsTests {
     test_isSettingsOpen_General1440() => assertFor("settings\settingsGeneral1440.png", isSettingsOpen.Bind())
+    test_isSettingsOpen_MatchDetails1440() => assertFor("settings\settingsMatchDetails1440.png", isSettingsOpen.Bind())
 
     test_isDbdFinishedLoading_1440() => assertFor("mainmenu\mainmenu_1440.png", isDbdFinishedLoading.Bind())
     test_isDbdFinishedLoading_1080() => assertFor("mainmenu\mainmenu_1080.png", isDbdFinishedLoading.Bind())
