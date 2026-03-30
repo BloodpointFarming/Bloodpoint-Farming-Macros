@@ -22,10 +22,10 @@ isDbdFinishedLoading() {
     return escTextIsWhite && backArrowIsRed
 }
 
-backEscWhiteE := Coords2K(239, 1348)
-backRedArrow := Coords2K(137, 1345)
 isSettingsOpen() {
-    settingsWhiteishMatchDetailsE := coords.getColor(backEscWhiteE)
+    static backEWhite := Coords2K(239, 1350)
+    static backRedArrow := Coords2K(137, 1349)
+    settingsWhiteishMatchDetailsE := coords.getColor(backEWhite)
     settingsRedishBackArrow := coords.getColor(backRedArrow)
 
     w := isWhiteish(settingsWhiteishMatchDetailsE, 0xB0)

@@ -38,7 +38,7 @@ abandonMatch() {
     ; Full process of abandoning the match.
     Send("{ESC}")
 
-    if not waitUntilF(isSettingsOpen)
+    if not waitUntilF(isSettingsOpen, maxDurationMs := 1000)
         return
 
     if not doWithRetriesUntilF(
