@@ -2,6 +2,7 @@
 #Include AutoUpdateTests.ahk
 #Include AutospenderTests.ahk
 #Include DebuggingTests.ahk
+#Include InputMappingTests.ahk
 #Include PixelCheckTests.ahk
 #Include PregameTests.ahk
 #Include QTests.ahk
@@ -15,6 +16,7 @@ Yunit
         AutoSpenderTests,
         AutoUpdateTests,
         DebuggingTests,
+        InputMappingTests,
         PixelCheckTests,
         PregameTests,
         QTests,

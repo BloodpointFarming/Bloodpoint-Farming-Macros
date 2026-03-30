@@ -31,29 +31,29 @@ class KeyBind {
         /**
          * {@returns InputMapping.AhkKey}
          */
-        moveForward => this.getMapping().bindingFor("MoveForwardSurvivor", 1)
+        moveForward => this.getMapping().bindingFor("MoveForwardSurvivor", 1).withDefault("W")
         /**
          * {@returns InputMapping.AhkKey}
          */
-        moveBack => this.getMapping().bindingFor("MoveForwardSurvivor", -1)
+        moveBack => this.getMapping().bindingFor("MoveForwardSurvivor", -1).withDefault("S")
         /**
          * {@returns InputMapping.AhkKey}
          */
-        moveLeft => this.getMapping().bindingFor("MoveRightSurvivor", -1)
+        moveLeft => this.getMapping().bindingFor("MoveRightSurvivor", -1).withDefault("A")
         /**
          * {@returns InputMapping.AhkKey}
          */
-        moveRight => this.getMapping().bindingFor("MoveRightSurvivor", 1)
+        moveRight => this.getMapping().bindingFor("MoveRightSurvivor", 1).withDefault("D")
         /**
          * Dead hard, Invocation: Spiders, etc.
          * {@returns InputMapping.AhkKey}
          */
-        e => this.getMapping().bindingFor("Action_Camper",)
+        e => this.getMapping().bindingFor("Action_Camper").withDefault("E")
         /**
          * Invocation: Crows
          * {@returns InputMapping.AhkKey}
          */
-        f => this.getMapping().bindingFor("AbilityTwo_Camper")
+        f => this.getMapping().bindingFor("AbilityTwo_Camper").withDefault("F")
         /**
          * Heal, repair, open chest, pick up item, etc.
          * {@returns InputMapping.AhkKey}
@@ -67,11 +67,11 @@ class KeyBind {
         /**
          * {@returns InputMapping.AhkKey}
          */
-        gesturePoint => this.getMapping().bindingFor("Gesture01")
+        gesturePoint => this.getMapping().bindingFor("Gesture01").withDefault("1")
         /**
          * {@returns InputMapping.AhkKey}
          */
-        gestureComeHere => this.getMapping().bindingFor("Gesture02")
+        gestureComeHere => this.getMapping().bindingFor("Gesture02").withDefault("2")
         /**
          * Modifier key
          * {@returns InputMapping.AhkKey}
@@ -81,46 +81,46 @@ class KeyBind {
          * Modifier key
          * {@returns InputMapping.AhkKey}
          */
-        crouch => this.getMapping().bindingFor("Crouch")
+        crouch => this.getMapping().bindingFor("Crouch").withDefault("LCtrl")
         /**
          * Wiggle, etc.
          * {@returns InputMapping.AhkKey}
          */
-        space => this.getMapping().bindingFor("SecondaryAction_Camper")
+        space => this.getMapping().bindingFor("SecondaryAction_Camper").withDefault("Space")
         /**
          * {@returns InputMapping.AhkKey}
          */
-        dropItem => this.getMapping().bindingFor("ItemDrop_Camper")
+        dropItem => this.getMapping().bindingFor("ItemDrop_Camper").withDefault("R")
         /**
          * {@returns InputMapping.AhkKey}
          */
-        eventAbility => this.getMapping().bindingFor("EventAbility_Survivor")
+        eventAbility => this.getMapping().bindingFor("EventAbility_Survivor").withDefault("Q")
     }
 
     class KillerOps {
-        __New(getMapping := InputMapping.getMapping.Bind()) {
+        __New(getMapping := (self?) => InputMapping.getMapping()) {
             this.getMapping := getMapping
         }
         /**
          * {@returns InputMapping.AhkKey}
          */
-        moveForward => this.getMapping().bindingFor("MoveForwardKiller", 1)
+        moveForward => this.getMapping().bindingFor("MoveForwardKiller", 1).withDefault("W")
         /**
          * {@returns InputMapping.AhkKey}
          */
-        moveBack => this.getMapping().bindingFor("MoveForwardKiller", -1)
+        moveBack => this.getMapping().bindingFor("MoveForwardKiller", -1).withDefault("S")
         /**
          * {@returns InputMapping.AhkKey}
          */
-        moveLeft => this.getMapping().bindingFor("MoveRightKiller", -1)
+        moveLeft => this.getMapping().bindingFor("MoveRightKiller", -1).withDefault("A")
         /**
          * {@returns InputMapping.AhkKey}
          */
-        moveRight => this.getMapping().bindingFor("MoveRightKiller", 1)
+        moveRight => this.getMapping().bindingFor("MoveRightKiller", 1).withDefault("D")
         /**
          * {@returns InputMapping.AhkKey}
          */
-        interact => this.getMapping().bindingFor("Interact_Slasher")
+        interact => this.getMapping().bindingFor("Interact_Slasher").withDefault("Space")
     }
 }
 
@@ -173,7 +173,7 @@ class InputMapping {
     }
 
     /**
-     * Returns the AHK key code for use in Send(...).
+     * Returns the AhkKey binding or an UnboundAhkKey.
      * 
      * @param name DBD ActionName/AxisName
      * @param scale 1 or -1 for AxisName values
@@ -181,9 +181,11 @@ class InputMapping {
      */
     bindingFor(name, scale?) {
         key := IsSet(scale) ? InputMapping.indexKey(name, scale) : InputMapping.indexKey(name)
-        if not this.ahkKeys.Has(key)
-            throw Error("No Input.ini mapping for " name (IsSet(scale) ? " " scale : ""))
-        return this.ahkKeys[key]
+        if not this.ahkKeys.Has(key) {
+            return InputMapping.UnboundAhkKey("No Input.ini mapping for " name (IsSet(scale) ? " " scale : ""))
+        } else {
+            return this.ahkKeys[key]
+        }
     }
 
     /**
@@ -202,80 +204,88 @@ class InputMapping {
     }
 
     __New(path) {
-        lines := StrSplit(IniRead(path, "/Script/EnhancedInput.EnhancedPlayerInput"), "`n")
+        /**
+         * The Input.ini may be missing entirely if the player has not changed any default bindings.
+         * As much as it pains me, we'll return an empty mapping here and rely on defaults for each action.
+         */
+        try {
+            lines := StrSplit(IniRead(path, "/Script/EnhancedInput.EnhancedPlayerInput"), "`n")
 
-        parseBinding(line) {
-            attrs := Map()
+            parseBinding(line) {
+                attrs := Map()
 
-            ; ActionMappings=(ActionName="Action_Camper",bShift=False,bCtrl=False,bAlt=False,bCmd=False,Key=E)
-            ; extract the content inside the parens.
-            ; IniRead removes comments for us.
-            RegExMatch(line, ".*Mappings=\((.+)\)", &match)
-            if match and match.Count == 1 {
-                content := match[1]
-                pairs := StrSplit(content, ',')
+                ; ActionMappings=(ActionName="Action_Camper",bShift=False,bCtrl=False,bAlt=False,bCmd=False,Key=E)
+                ; extract the content inside the parens.
+                ; IniRead removes comments for us.
+                RegExMatch(line, ".*Mappings=\((.+)\)", &match)
+                if match and match.Count == 1 {
+                    content := match[1]
+                    pairs := StrSplit(content, ',')
 
-                for pair in pairs {
-                    kv := StrSplit(pair, "=", , 2)
-                    key := parseValue(kv[1])
-                    value := parseValue(kv[2])
-                    attrs[key] := value
+                    for pair in pairs {
+                        kv := StrSplit(pair, "=", , 2)
+                        key := parseValue(kv[1])
+                        value := parseValue(kv[2])
+                        attrs[key] := value
+                    }
+                }
+
+                return attrs
+            }
+
+            parseValue(value) {
+                unwrapped := value
+                len := StrLen(unwrapped)
+                if len > 2 and StrEndsWith(value, '`"') and StrEndsWith(value, '`"') {
+                    unwrapped := SubStr(value, 2, len - 2)
+                }
+                switch {
+                    case unwrapped == "False": return false
+                    case unwrapped == "True": return true
+                    case IsNumber(unwrapped):
+                        ; coerce floats to integers if equivalent
+                        num := Number(unwrapped) ; IsInteger(Number(1.0)) => Float
+                        int := Integer(unwrapped) ; truncates
+                        return int == num ? int : num
+                    default: return unwrapped
                 }
             }
 
-            return attrs
-        }
+            ; Gather up all bindings, find the best one.
+            bindings := Map()
+            for line in lines {
+                binding := parseBinding(line)
 
-        parseValue(value) {
-            unwrapped := value
-            len := StrLen(unwrapped)
-            if len > 2 and StrEndsWith(value, '`"') and StrEndsWith(value, '`"') {
-                unwrapped := SubStr(value, 2, len - 2)
+                if not binding.Has("Key") or StrStartsWith(binding["Key"], "Gamepad")
+                    continue
+
+                if not binding.Has("ActionName") and not binding.Has("AxisName")
+                    continue
+
+                ; Define an index key for the binding (not the physical key)
+                bindingsKey := ""
+                if binding.Has("ActionName")
+                    bindingsKey := InputMapping.indexKey(binding["ActionName"])
+                else
+                    bindingsKey := InputMapping.indexKey(binding["AxisName"], binding["Scale"])
+
+                if not bindings.Has(bindingsKey) or not InStr(binding["Key"], "Mouse") {
+                    ; Prefer non-mouse bindings since they're less flaky
+                    bindings[bindingsKey] := binding
+                }
             }
-            switch {
-                case unwrapped == "False": return false
-                case unwrapped == "True": return true
-                case IsNumber(unwrapped):
-                    ; coerce floats to integers if equivalent
-                    num := Number(unwrapped) ; IsInteger(Number(1.0)) => Float
-                    int := Integer(unwrapped) ; truncates
-                    return int == num ? int : num
-                default: return unwrapped
+
+            ; We don't need the full binding info details anymore.
+            ; Preserve only the AHK versions.
+            ahkKeys := Map()
+            for k, binding in bindings {
+                ahkKey := InputMapping.dbdMappingToAhkKey(binding)
+                ahkKeys[k] := ahkKey
             }
+            this.ahkKeys := ahkKeys
+        } catch Error as e {
+            logger.error("Problem reading input mapping: " e.message " (" path ")")
         }
-
-        ; Gather up all bindings, find the best one.
-        bindings := Map()
-        for line in lines {
-            binding := parseBinding(line)
-
-            if not binding.Has("Key") or StrStartsWith(binding["Key"], "Gamepad")
-                continue
-
-            if not binding.Has("ActionName") and not binding.Has("AxisName")
-                continue
-
-            ; Define an index key for the binding (not the physical key)
-            bindingsKey := ""
-            if binding.Has("ActionName")
-                bindingsKey := InputMapping.indexKey(binding["ActionName"])
-            else
-                bindingsKey := InputMapping.indexKey(binding["AxisName"], binding["Scale"])
-
-            if not bindings.Has(bindingsKey) or not InStr(binding["Key"], "Mouse") {
-                ; Prefer non-mouse bindings since they're less flaky
-                bindings[bindingsKey] := binding
-            }
-        }
-
-        ; We don't need the full binding info details anymore.
-        ; Preserve only the AHK versions.
-        ahkKeys := Map()
-        for k, binding in bindings {
-            ahkKey := InputMapping.dbdMappingToAhkKey(binding)
-            ahkKeys[k] := ahkKey
-        }
-        this.ahkKeys := ahkKeys
     }
 
     static dbdMappingToAhkKey(dbdMapping) {
@@ -390,5 +400,24 @@ class InputMapping {
                 return
             this.up()
         }
+        withDefault(rawKey) => this
+    }
+
+    /**
+     * Represents a missing binding.
+     */
+    class UnboundAhkKey {
+        __New(msg) {
+            this.msg := msg
+            this.rawKey := false
+        }
+        Call(self?) => this.throwError()
+        down() => this.throwError()
+        up() => this.throwError()
+        hold(durationMs) => this.throwError()
+        throwError() {
+            throw Error("Missing binding! " this.msg)
+        }
+        withDefault(rawKey) => InputMapping.AhkKey(rawKey)
     }
 }
