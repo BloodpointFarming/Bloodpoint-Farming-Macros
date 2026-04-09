@@ -1,6 +1,7 @@
 #Requires AutoHotkey v2+
 
 #Include autoupdate_run.ahk
+#Include blocking.ahk
 #Include colors.ahk
 #Include coords.ahk
 #Include constants.ahk

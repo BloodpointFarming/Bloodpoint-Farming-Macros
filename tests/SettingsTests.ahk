@@ -28,6 +28,8 @@ class SettingsTests {
     test_isAbandonEscapeOptionVisible_1440() => assertFor("match\matchAbandonEsc1440.png", isAbandonEscapeOptionVisible.Bind())
     test_isAbandonEscapeOptionVisible_1080() => assertFor("match\matchAbandonEsc1080.png", isAbandonEscapeOptionVisible.Bind())
     test_isAbandonEscapeOptionVisible_1440Xbox() => assertFor("match\matchAbandon1440Xbox.png", isAbandonEscapeOptionVisible.Bind())
+    test_isAbandonEscapeOptionVisible_1() => assertFor("match\abandon-1.png", isAbandonEscapeOptionVisible.Bind())
+    test_isAbandonEscapeOptionVisible_2() => assertFor("match\abandon-2.png", isAbandonEscapeOptionVisible.Bind())
 
     test_isAbandonConfirmOpen_1440() => assertFor("settings\confirmAbandon1440.png", isAbandonConfirmOpen.Bind())
 }

@@ -27,7 +27,7 @@ CheckForAbandon() {
     if (isAbandonEscapeOptionVisible()) {
         start := A_TickCount
 
-        abandonMatch()
+        withMouseBlocked(abandonMatch)
 
         abandonTookMs := A_TickCount - start
         logger.info("Abandoning match took " . abandonTookMs . " ms")
@@ -36,9 +36,10 @@ CheckForAbandon() {
 
 abandonMatch() {
     ; Full process of abandoning the match.
+    logger.info("Abandon sighted.")
+    
     Send("{ESC}")
-
-    if not waitUntilF(isSettingsOpen, maxDurationMs := 1000)
+    if not waitUntilF(isSettingsOpen, maxDurationMs := 500)
         return
 
     if not doWithRetriesUntilF(

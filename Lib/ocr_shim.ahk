@@ -56,7 +56,7 @@ class OcrShim {
      * @param br bottom-right coords
      */
     static fromRect(tl, br, opts := {}) {
-        static xPadding := 5
+        static xPadding := 10
         static yPadding := 10
         opts.x := tl.scaledX() - xPadding
         opts.y := tl.scaledY() - yPadding
