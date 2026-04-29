@@ -59,7 +59,11 @@ repairPoints := [toolboxRepairRWhite, toolboxRepairTWhite, repairE, repairA]
 isRepairingFrom(img) => isNormalRepair(img) or isToolboxRepairFrom(img)
 isRepairing() {
     static rect := getBoundingRect(repairPoints)
-    return isRepairingFrom(Subscreenshot.ofPoints(rect))
+    try {
+        return isRepairingFrom(Subscreenshot.ofPoints(rect))
+    } catch Error as e {
+        return false
+    }
 }
 
 progressBarYTop := 1155
@@ -107,8 +111,8 @@ getProgressFrom(img) {
     progressPx := 0
 
     isProgressCompleteAt(x) {
-        colorMid := img.getColor(Coords2K(x, progressBarY))
-        hsvMid := colorToHSV(colorMid)
+        getHsv := (y) => colorToHSV(img.getColor(Coords2K(x, y)))
+        hsvMid := getHsv(progressBarY)
         ; Bright Red or Yellow is clearly the progress bar.
         ; Yellow: #e4c22a (h: 49,  s: 0.81, v: 89/100)
         ; Red:    #e4c22a (h: 216, s: 1,    v: 85/100)
@@ -116,14 +120,30 @@ getProgressFrom(img) {
         ; Faster than querying additional colors for red/yellow, but doesn't work for gray bars.
         isVividColor := hsvMid.value > 0xC0 and hsvMid.sat > 0.6
 
-        isDarkerThanMid(y) {
-            color := img.getColor(Coords2K(x, y))
-            hsv := colorToHSV(color)
-            valueDiff := Abs(hsv.value - hsvMid.value)
-            satDiff := Abs(hsv.sat - hsvMid.sat)
-            return valueDiff > 20 or satDiff > 0.1
+        /**
+         * Incomplete progress bar section is mostly the same color over an entire column,
+         * whereas the center is usually lighter than the edges.
+         */
+        isEdgeDarkerThanMid() {
+            /**
+             * Brightest y values, even including the moving arrow.
+             */
+            static midYs := [progressBarY, progressBarY + 1, progressBarY + 2]
+            top := getHsv(progressBarYTop)
+            bot := getHsv(progressBarYBottom)
+            edgeVal := Min(top.value, bot.value)
+            edgeSat := Min(top.sat, bot.sat)
+
+            for midY in midYs {
+                hsvMid := getHsv(midY)
+                valDiff := Abs(edgeVal - hsvMid.value)
+                satDiff := Abs(edgeSat - hsvMid.sat)
+                if valDiff > 20 or satDiff > 0.1
+                    return true
+            }
+            return false
         }
-        return isVividColor or isDarkerThanMid(progressBarYTop) or isDarkerThanMid(progressBarYBottom)
+        return isVividColor or isEdgeDarkerThanMid()
     }
 
     while left <= right {

@@ -38,6 +38,9 @@ lastSample() => samples[samples.Length]
 SetTimer(onTimer, config.PollFrequencyMs)
 onTimer() {
     global samples
+    if not WinActive(dbdWinTitle)
+        return
+
     progress := getProgress()
 
     if progress == -1 {
