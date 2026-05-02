@@ -24,6 +24,16 @@ class ProgressTests {
     test_getProgress_ToolboxProgressBarGray79() => assertFor("actions\repair\gray-79.png", () => assertProgress(0.79, 0.80))
     test_getProgress_ToolboxProgressBarGray85() => assertFor("actions\repair\gray-85.png", () => assertProgress(0.85, 0.86))
     test_isRepairing_notSelfcare() => assertFor("actions\selfcare\selfcare-1440.png", () => not isRepairing())
+
+    ; 9.6.0 progress bar change:
+    test_repair0() => assertFor("actions\repair\repair-0.png", () => assertRepairPct(0))
+    test_repairReshade0() => assertFor("actions\repair\repair-reshade-0.png", () => assertRepairPct(0))
+    test_repair100() => assertFor("actions\repair\repair-reshade-100.png", () => assertRepairPct(100))
+    test_repairReshade100() => assertFor("actions\repair\repair-100.png", () => assertRepairPct(100))
+
+    test_toolbox0() => assertFor("actions\toolbox\toolbox-0.png", () => assertToolboxPct(0))
+    test_toolboxReshade0() => assertFor("actions\toolbox\toolbox-reshade-0.png", () => assertToolboxPct(0))
+    test_toolbox100() => assertFor("actions\toolbox\toolbox-100.png", () => assertToolboxPct(100))
 }
 
 assertProgress(low, high) {
@@ -33,3 +43,24 @@ assertProgress(low, high) {
     return true
 }
 
+assertRepairPct(expectPctComplete) => testProgressBar(repairBarStart.scaledX(), repairBarEnd.scaledX(), expectPctComplete)
+assertToolboxPct(expectPctComplete) => testProgressBar(toolboxBarStart.scaledX(), toolboxBarEnd.scaledX(), expectPctComplete)
+
+testProgressBar(xStart, xEnd, expectPctComplete) {
+    img := Subscreenshot.ofPoints(getBoundingRect(getProgressPoints))
+
+    x := xStart
+    width := xEnd - xStart
+    loop width {
+        i := A_Index - 1
+        x := xStart + i
+        isComplete := isProgressCompleteAt(img, x)
+        shouldBeComplete := i / width < expectPctComplete
+
+        if isComplete != shouldBeComplete {
+            toBool(i) => i = 0 ? "true" : "false"
+            throw Error("FAIL: isProgressCompleteAt(" x ") == " toBool(isComplete), -2)
+        }
+    }
+    return true
+}

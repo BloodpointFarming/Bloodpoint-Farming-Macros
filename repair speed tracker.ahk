@@ -16,7 +16,6 @@ config := {
      * How long should we wait for repair to resume before deciding it's completed?
      */
     GracePeriodSeconds: 2,
-
     /**
      * How often to check for gen progress?
      * Lower values result in higher precision and higher CPU load.
@@ -26,8 +25,17 @@ config := {
      * This doesn't need to be super precise if measuring longer segments of constant repair speed.
      * Skill check builds may want the high precision.
      */
-    PollFrequencyMs : 20,
+    PollFrequencyMs: 1000 / 60,
+    /**
+     * Capture a screenshot if the gen regresses.
+     * This 
+     */
+    screenshotRegressions: false,
 }
+
+dir := A_Temp "\repair"
+if not DirExist(dir)
+    DirCreate(dir)
 
 /**
  * [{ticks: t, progress: p}, ...]
@@ -40,8 +48,10 @@ onTimer() {
     global samples
     if not WinActive(dbdWinTitle)
         return
-
-    progress := getProgress()
+    
+    static rect := getBoundingRect(getProgressPoints)
+    ss := Subscreenshot.ofPoints(rect)
+    progress := getProgressFrom(ss)
 
     if progress == -1 {
         ; Repair is inactive
@@ -53,11 +63,21 @@ onTimer() {
         }
     } else {
         ; Repair is active
-
-        if samples.Length == 0 or progress != lastSample().progress {
+        lastProgress := samples.Length == 0 ? 0 : lastSample().progress
+        if samples.Length == 0 or progress != lastProgress {
             ; Repair progress change
             samples.Push({ ticks: qpcGetTicks(), progress: progress })
-            logger.info(progress)
+            logger.info(Format("{:.1f}%", progress * 100))
+        }
+
+        ; Regression?
+        if config.screenshotRegressions and samples.Length > 0 and lastProgress != -1 {
+            lastProgress := lastProgress
+            delta := progress - lastProgress
+            if delta < 0 {
+                filePath := dir "/regression-" lastProgress "-to-" progress ".png"
+                Gdip_SaveBitmapToFile(ss.img.pBitmap, filePath)
+            }
         }
     }
 }
@@ -73,10 +93,6 @@ writeTsv(samples) {
         seconds := qpcTicksToSeconds(sample.ticks - samples[1].ticks)
         tsv .= seconds '`t' sample.progress '`n'
     }
-
-    dir := A_Temp "\repair"
-    if not DirExist(dir)
-        DirCreate(dir)
 
     timestamp := FormatTime(, "yyyy-MM-dd_HH-mm-ss")
     totalTicks := lastSample().ticks - samples[1].ticks

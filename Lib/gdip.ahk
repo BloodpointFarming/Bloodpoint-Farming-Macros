@@ -2,4 +2,4 @@
 
 #Include Gdip_All.ahk
 
-Gdip_Startup()
+pToken := Gdip_Startup()

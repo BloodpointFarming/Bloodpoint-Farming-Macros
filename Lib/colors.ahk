@@ -70,6 +70,14 @@ colorToHSV(color) {
     return { hue: h, sat: s, value: maxVal }
 }
 
+colorToValue(color) {
+    r := (color >> 16) & 0xFF
+    g := (color >> 8) & 0xFF
+    b := color & 0xFF
+
+    return Max(r, g, b)
+}
+
 isWhiteish(color, threshold := 0xD0, tolerance := 5) {
     ; Most reshade filters leave near-pure-white pixels as near-pure-white.
     r := (color >> 16) & 0xFF

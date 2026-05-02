@@ -66,9 +66,9 @@ isRepairing() {
     }
 }
 
-progressBarYTop := 1155
+progressBarYTop := 1156
 progressBarY := 1161
-progressBarYBottom := 1166
+progressBarYBottom := 1162
 toolboxBarStart := Coords2K(1120, progressBarYTop)
 toolboxBarEnd := Coords2K(1512, progressBarYBottom)
 repairBarStart := Coords2K(1096, progressBarYTop)
@@ -110,46 +110,10 @@ getProgressFrom(img) {
     right := width
     progressPx := 0
 
-    isProgressCompleteAt(x) {
-        getHsv := (y) => colorToHSV(img.getColor(Coords2K(x, y)))
-        hsvMid := getHsv(progressBarY)
-        ; Bright Red or Yellow is clearly the progress bar.
-        ; Yellow: #e4c22a (h: 49,  s: 0.81, v: 89/100)
-        ; Red:    #e4c22a (h: 216, s: 1,    v: 85/100)
-        ; Better than edge detection when the exposure is blown out and the edges are no longer visible.
-        ; Faster than querying additional colors for red/yellow, but doesn't work for gray bars.
-        isVividColor := hsvMid.value > 0xC0 and hsvMid.sat > 0.6
-
-        /**
-         * Incomplete progress bar section is mostly the same color over an entire column,
-         * whereas the center is usually lighter than the edges.
-         */
-        isEdgeDarkerThanMid() {
-            /**
-             * Brightest y values, even including the moving arrow.
-             */
-            static midYs := [progressBarY, progressBarY + 1, progressBarY + 2]
-            top := getHsv(progressBarYTop)
-            bot := getHsv(progressBarYBottom)
-            edgeVal := Min(top.value, bot.value)
-            edgeSat := Min(top.sat, bot.sat)
-
-            for midY in midYs {
-                hsvMid := getHsv(midY)
-                valDiff := Abs(edgeVal - hsvMid.value)
-                satDiff := Abs(edgeSat - hsvMid.sat)
-                if valDiff > 20 or satDiff > 0.1
-                    return true
-            }
-            return false
-        }
-        return isVividColor or isEdgeDarkerThanMid()
-    }
-
     while left <= right {
         mid := Floor((left + right) / 2)
         x := start.x + (mid - 1)
-        if isProgressCompleteAt(x) {
+        if isProgressCompleteAt(img, x) {
             progressPx := mid
             left := mid + 1
         } else {
@@ -158,4 +122,40 @@ getProgressFrom(img) {
     }
     progressPct := progressPx / width
     return progressPct
+}
+
+isProgressCompleteAt(img, x) {
+    static edgeY := [progressBarYTop, progressBarYBottom]
+    static valueThreshold := 10 ; as high as 8 on incomplete bar
+
+    hsvMid := colorToHSV(img.getColor(Coords2K(x, progressBarY)))
+    ; Bright Red or Yellow is clearly the progress bar.
+    ; Yellow: #e4c22a (h: 49,  s: 0.81, v: 89/100)
+    ; Red:    #e4c22a (h: 216, s: 1,    v: 85/100)
+    ; More accurate than brightness differences when the exposure is blown out and the edges are no longer visible.
+    ; Faster than querying additional colors for red/yellow, but doesn't work for gray bars.
+    if hsvMid.value > 0x80 and hsvMid.sat > 0.6
+        return true
+
+    /**
+     * Normal (gray bar) repair? Tricky to determine.
+     * Incomplete bar is generally same (brightness) value along a column.
+     * Moving progress arrows (9.6.0) make the brightness dynamic.
+     * If there's significant difference across several points in the column, it's complete.
+     */
+    minVal := hsvMid.value
+    maxVal := minVal
+    for y in edgeY {
+        edgeVal := colorToValue(img.getColor(Coords2K(x, y)))
+
+        minVal := Min(minVal, edgeVal)
+        maxVal := Max(maxVal, edgeVal)
+        delta := maxVal - minVal
+
+        if delta > valueThreshold {
+            return true
+        }
+    }
+
+    return false
 }
