@@ -367,7 +367,10 @@ class InputMapping {
             if dbdMapping.Has(dbdMod) and dbdMapping[dbdMod]
                 rawKey .= ahkMod
         }
-        rawKey .= keyMapping.Get(key, key)
+        ; Apparently Send("{W down}") results in the Shift key reaching DBD.
+        ; Lowercase it first if it's a single character.
+        maybeLowercasedKey := StrLen(key) == 1 ? StrLower(key) : key
+        rawKey .= keyMapping.Get(key, maybeLowercasedKey)
         return InputMapping.AhkKey(rawKey)
     }
 
