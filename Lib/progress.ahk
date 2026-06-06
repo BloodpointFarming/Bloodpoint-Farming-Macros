@@ -134,7 +134,7 @@ isProgressCompleteAt(img, x) {
     ; Red:    #e4c22a (h: 216, s: 1,    v: 85/100)
     ; More accurate than brightness differences when the exposure is blown out and the edges are no longer visible.
     ; Faster than querying additional colors for red/yellow, but doesn't work for gray bars.
-    if hsvMid.value > 0x80 and hsvMid.sat > 0.6
+    if hsvMid.value > 0x80 and hsvMid.sat > 0.4
         return true
 
     /**

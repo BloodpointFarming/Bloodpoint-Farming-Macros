@@ -12,6 +12,7 @@ class DbdTestWindow extends DbdWindowOps {
         if !pBitmap
             throw Error("DbdTestWindow requires a pBitmap")
         this.pBitmap := pBitmap
+        this.checkScale()
     }
     checkScale() {
         this._width := Gdip_GetImageWidth(this.pBitmap)
@@ -98,7 +99,17 @@ class FakeCapture extends WindowCapture {
         this.pBitmap := pBitmap
     }
 
-    of(x, y, w, h) => PBitmapImage(Gdip_CloneBitmapArea(this.pBitmap, x, y, w, h))
+    of(x, y, w, h) => TestPBitmapImage(Gdip_CloneBitmapArea(this.pBitmap, x, y, w, h))
+}
+class TestPBitmapImage extends PBitmapImage {
+    __New(pBitmap) {
+        super.__New(pBitmap)
+    }
+    getColor(x, y) {
+        color := super.getColor(x, y)
+        ; logger.trace("getColor(" x ", " y ") = " Format("{:06X}", color))
+        return color
+    }
 }
 
 setupFakeWindow(screenshotPath) {

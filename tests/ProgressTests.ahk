@@ -26,14 +26,15 @@ class ProgressTests {
     test_isRepairing_notSelfcare() => assertFor("actions\selfcare\selfcare-1440.png", () => not isRepairing())
 
     ; 9.6.0 progress bar change:
-    test_repair0() => assertFor("actions\repair\repair-0.png", () => assertRepairPct(0))
-    test_repairReshade0() => assertFor("actions\repair\repair-reshade-0.png", () => assertRepairPct(0))
-    test_repair100() => assertFor("actions\repair\repair-reshade-100.png", () => assertRepairPct(100))
-    test_repairReshade100() => assertFor("actions\repair\repair-100.png", () => assertRepairPct(100))
+    test_repair0() => assertFor("actions\repair\repair-0.png", () => assertRepairProgress(0))
+    test_repairReshade0() => assertFor("actions\repair\repair-reshade-0.png", () => assertRepairProgress(0))
+    test_repair100() => assertFor("actions\repair\repair-reshade-100.png", () => assertRepairProgress(1))
+    test_repairReshade100() => assertFor("actions\repair\repair-100.png", () => assertRepairProgress(1))
 
-    test_toolbox0() => assertFor("actions\toolbox\toolbox-0.png", () => assertToolboxPct(0))
-    test_toolboxReshade0() => assertFor("actions\toolbox\toolbox-reshade-0.png", () => assertToolboxPct(0))
-    test_toolbox100() => assertFor("actions\toolbox\toolbox-100.png", () => assertToolboxPct(100))
+    test_toolbox0() => assertFor("actions\toolbox\toolbox-0.png", () => assertToolboxProgress(0))
+    test_toolboxReshade0() => assertFor("actions\toolbox\toolbox-reshade-0.png", () => assertToolboxProgress(0))
+    test_toolbox100() => assertFor("actions\toolbox\toolbox-100.png", () => assertToolboxProgress(1))
+    test_toolbox53px() => assertFor("actions\toolbox\toolbox-53px.png", () => assertToolboxProgress(toolboxPxToProgress(53)))
 }
 
 assertProgress(low, high) {
@@ -43,10 +44,15 @@ assertProgress(low, high) {
     return true
 }
 
-assertRepairPct(expectPctComplete) => testProgressBar(repairBarStart.scaledX(), repairBarEnd.scaledX(), expectPctComplete)
-assertToolboxPct(expectPctComplete) => testProgressBar(toolboxBarStart.scaledX(), toolboxBarEnd.scaledX(), expectPctComplete)
+assertRepairProgress(expectedProgress) => testProgressBar(repairBarStart.scaledX(), repairBarEnd.scaledX(), expectedProgress)
+assertToolboxProgress(expectedProgress) => testProgressBar(toolboxBarStart.scaledX(), toolboxBarEnd.scaledX(), expectedProgress)
 
-testProgressBar(xStart, xEnd, expectPctComplete) {
+toolboxPxToProgress(completedPx) => completedPx / (toolboxBarEnd.scaledX() - toolboxBarStart.scaledX())
+
+/**
+ * Test every pixel in the bar.
+ */
+testProgressBar(xStart, xEnd, expectedProgress) {
     img := Subscreenshot.ofPoints(getBoundingRect(getProgressPoints))
 
     x := xStart
@@ -55,11 +61,12 @@ testProgressBar(xStart, xEnd, expectPctComplete) {
         i := A_Index - 1
         x := xStart + i
         isComplete := isProgressCompleteAt(img, x)
-        shouldBeComplete := i / width < expectPctComplete
+        p := i / width
+        shouldBeComplete := p < expectedProgress
 
         if isComplete != shouldBeComplete {
-            toBool(i) => i = 0 ? "true" : "false"
-            throw Error("FAIL: isProgressCompleteAt(" x ") == " toBool(isComplete), -2)
+            toBool(i) => i ? "true" : "false"
+            throw Error("FAIL: isProgressCompleteAt(" x ") == " toBool(isComplete) ". Expected " toBool(shouldBeComplete) ". (px " i ")", -2)
         }
     }
     return true
