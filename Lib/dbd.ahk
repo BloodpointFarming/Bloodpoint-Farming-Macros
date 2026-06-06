@@ -100,8 +100,8 @@ getBloodwebLevel() {
 }
 
 isAbandonEscapeOptionVisible() {
-    static tl := Coords2K(2246, 81)
-    static br := Coords2K(2374, 101)
+    static tl := Coords2K(2246, 121)
+    static br := Coords2K(2374, 141)
 
     result := OcrShim.fromRect(tl, br)
     return result.containsText("ABANDON")
