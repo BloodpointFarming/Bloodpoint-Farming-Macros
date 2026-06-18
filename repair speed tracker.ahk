@@ -28,7 +28,7 @@ config := {
      * This doesn't need to be super precise if measuring longer segments of constant repair speed.
      * Skill check builds may want the high precision.
      */
-    PollFrequencyMs: 1000 / 60,
+    PollFrequencyMs: 1000 / 30,
     tsv: {
         /**
          * Write out a TSV file after the repair is completed
