@@ -43,7 +43,20 @@ class OcrShim {
             return false
         }
 
+        findWord(result, needle) {
+            for word in result.Words {
+                normalized := OcrShim.NormalizeAccents(word.Text)
+                if InStr(normalized, needle, false) {
+                    word.opts := opts ; expose the original opts in case we need to click on the word
+                    return word
+                }
+            }
+            return false
+        }
+
         result.DefineProp("containsText", { Call: containsText })
+        result.DefineProp("findWord", { Call: findWord })
+        result.opts := opts ; expose the original opts in case we need to click on the word
 
         return result
     }

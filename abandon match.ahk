@@ -24,43 +24,42 @@ CheckForAbandon() {
         return
     }
 
-    if (isAbandonEscapeOptionVisible()) {
+    if (isAbandonTabOptionVisible()) {
         start := A_TickCount
 
         withMouseBlocked(abandonMatch)
 
         abandonTookMs := A_TickCount - start
         logger.info("Abandoning match took " . abandonTookMs . " ms")
+        Sleep(5000) ; prevent stun locking the user
     }
 }
 
 abandonMatch() {
     ; Full process of abandoning the match.
     logger.info("Abandon sighted.")
-    
-    Send("{ESC}")
-    if not waitUntilF(isSettingsOpen, maxDurationMs := 500)
+
+    Send("{Tab}")
+    abandonButtonBottomRight := waitUntilF(findMatchDetailsAbandonButton, 500)
+    if not abandonButtonBottomRight
         return
 
-    if not doWithRetriesUntilF(
-        clickSettingsAbandonButton,
-        isAbandonConfirmOpen,
-        maxDurationMs := 1000,
-        timeBetweenRetries := 100
+    logger.info("Found bottom right button")
+    confirmButton := doWithRetriesUntilF(
+        () => clickWord(abandonButtonBottomRight),
+        findAbandonConfirmButton,
+        1000,
+        250
     )
+    if not confirmButton
         return
 
-    clickFinalAbandonButton()
+    clickWord(confirmButton)
 }
 
-clickSettingsAbandonButton() {
-    ; Abandon button in the bottom right of the settings page
-    scaled.click(2400, 1330)
-}
-
-clickFinalAbandonButton() {
-    ; Final abandon button
-    ; It loads in lower on the screen and drifts up.
-    ; We'll aim towards the bottom in case it's clickable then.
-    scaled.click(1844, 1067)
+clickWord(word) {
+    rect := word.BoundingRect
+    x := word.opts.x + rect.x + rect.w / 2
+    y := word.opts.y + rect.y + rect.h / 4 ; aim towards top for upwards moving text
+    ops.click(x, y)
 }

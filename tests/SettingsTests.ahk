@@ -12,8 +12,9 @@ if (A_ScriptFullPath = A_LineFile)
         .Test(SettingsTests)
 
 class SettingsTests {
-    test_isSettingsOpen_General1440() => assertFor("settings\settingsGeneral1440.png", isSettingsOpen.Bind())
-    test_isSettingsOpen_MatchDetails1440() => assertFor("settings\settingsMatchDetails1440.png", isSettingsOpen.Bind())
+    test_matchDetailsAbandon() => assertFor("match\matchDetails1440.png", findMatchDetailsAbandonButton)
+    ; test_matchDetailsAbandonHover() => assertFor("match\matchDetailsHover1440.png", findMatchDetailsAbandonButton)
+    test_abandonConfirmButton() => assertFor("match\abandonConfirm1440.png", findAbandonConfirmButton)
 
     test_isDbdFinishedLoading_1440() => assertFor("mainmenu\mainmenu_1440.png", isDbdFinishedLoading.Bind())
     test_isDbdFinishedLoading_1080() => assertFor("mainmenu\mainmenu_1080.png", isDbdFinishedLoading.Bind())
@@ -25,7 +26,5 @@ class SettingsTests {
     test_isHookSpaceOptionAvailable_1440Reshade() => assertFor("match\matchHookReshade1440.png", isHookSpaceOptionAvailable.Bind())
     test_isHookSpaceOptionAvailable_1080Reshade() => assertFor("match\matchHookReshade1080.png", isHookSpaceOptionAvailable.Bind())
 
-    test_isAbandonEscapeOptionVisible_1() => assertFor("match\abandon-1.png", isAbandonEscapeOptionVisible.Bind())
-
-    test_isAbandonConfirmOpen_1440() => assertFor("settings\confirmAbandon1440.png", isAbandonConfirmOpen.Bind())
+    test_isAbandonEscapeOptionVisible_1() => assertFor("match\abandon-1.png", isAbandonTabOptionVisible.Bind())
 }

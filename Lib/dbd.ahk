@@ -22,29 +22,6 @@ isDbdFinishedLoading() {
     return escTextIsWhite && backArrowIsRed
 }
 
-isSettingsOpen() {
-    static backEWhite := Coords2K(239, 1350)
-    static backRedArrow := Coords2K(137, 1349)
-    settingsWhiteishMatchDetailsE := coords.getColor(backEWhite)
-    settingsRedishBackArrow := coords.getColor(backRedArrow)
-
-    w := isWhiteish(settingsWhiteishMatchDetailsE, 0xB0)
-    r := isRedish(settingsRedishBackArrow)
-    return w && r
-}
-
-isSettingsGraphicsTabSelected() {
-    ; 'R' of 'GRAPHICS': (950, 100)
-    colorGraphicsR := scaled.getColor(950, 100)
-    return isWhiteish(colorGraphicsR)
-}
-
-isSettingsGraphicsFpsMenuOpen() {
-    ; Check for the base of the 2 of the 120: (1771, 1100)
-    colorFps120 := scaled.getColor(1771, 1100)
-    return isWhiteish(colorFps120)
-}
-
 getBloodwebLevel() {
     static opts := {}
     static dbdWidth := -1
@@ -99,21 +76,22 @@ getBloodwebLevel() {
     return level
 }
 
-isAbandonEscapeOptionVisible() {
-    static tl := Coords2K(2246, 121)
-    static br := Coords2K(2374, 141)
+/**
+ * Prompt in the top right of the screen when abandon is available.
+ * This may appear sooner than desired if the killer slugs you twice in a row.
+ */
+isAbandonTabOptionVisible() => findAbandonText(Coords2K(2240, 88), Coords2K(2376, 141))
 
+/**
+ * Bottom right.
+ */
+findMatchDetailsAbandonButton() => findAbandonText(Coords2K(2140, 1260), Coords2K(2560, 1440))
+
+findAbandonConfirmButton() => findAbandonText(Coords2K(1650, 1000), Coords2K(2000, 1300))
+
+findAbandonText(tl, br) {
     result := OcrShim.fromRect(tl, br)
-    return result.containsText("ABANDON")
-}
-
-isAbandonConfirmOpen() {
-    ; Abandon button
-    static tl := Coords2K(1772, 1041)
-    static br := Coords2K(1898, 1060)
-
-    result := OcrShim.fromRect(tl, br)
-    return result.containsText("ABANDON")
+    return result.findWord("ABANDON")
 }
 
 isHookSpaceOptionAvailable() {
@@ -136,7 +114,7 @@ tallyLeftArrowDark := Coords2K(353, 1193)
 tallyRightArrowWhite := Coords2K(859, 1197)
 tallyRightArrowDark := Coords2K(872, 1194)
 
-tallyContinueButtonRed := Coords2K(2424, 1348)
+tallyContinueButtonRed := Coords2K(2416, 1337)
 
 isTallyScreen() {
     static check := PixelCheck.ForAll(

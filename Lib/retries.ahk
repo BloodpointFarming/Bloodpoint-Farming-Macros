@@ -35,9 +35,10 @@ doWithRetriesUntilF(
 ) {
     startTime := A_TickCount  ; Get the current time (in milliseconds)
 
-    if predicate.Call() {
+    result := predicate.Call()
+    if result {
         ; logger.info("predicate took " . (A_TickCount - startTime) . " ms.")
-        return true
+        return result
     }
 
     while (A_TickCount - startTime < maxDurationMs) {
@@ -49,10 +50,11 @@ doWithRetriesUntilF(
         ; so we don't want to repeat the action if we don't need to.
 
         while A_TickCount - actionTime < timeBetweenRetries and A_TickCount - startTime < maxDurationMs {
-            if predicate.Call() {
-                duration := A_TickCount - startTime
+            result := predicate.Call()
+            if result {
+                ; duration := A_TickCount - startTime
                 ; logger.info("predicate took " . (A_TickCount - startTime) . " ms.")
-                return true
+                return result
             }
             Sleep(10)
         }
