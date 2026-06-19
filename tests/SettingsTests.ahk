@@ -13,7 +13,7 @@ if (A_ScriptFullPath = A_LineFile)
 
 class SettingsTests {
     test_matchDetailsAbandon() => assertFor("match\matchDetails1440.png", findMatchDetailsAbandonButton)
-    ; test_matchDetailsAbandonHover() => assertFor("match\matchDetailsHover1440.png", findMatchDetailsAbandonButton)
+    test_matchDetailsAbandonHover() => assertFor("match\matchDetailsAbandonHover1440.png", findMatchDetailsAbandonButton)
     test_abandonConfirmButton() => assertFor("match\abandonConfirm1440.png", findAbandonConfirmButton)
 
     test_isDbdFinishedLoading_1440() => assertFor("mainmenu\mainmenu_1440.png", isDbdFinishedLoading.Bind())
