@@ -59,7 +59,10 @@ abandonMatch() {
 
 clickWord(word) {
     rect := word.BoundingRect
-    x := word.opts.x + rect.x + rect.w / 2
-    y := word.opts.y + rect.y + rect.h / 4 ; aim towards top for upwards moving text
+    x := Integer(word.opts.x + rect.x + rect.w / 2)
+    y := Integer(word.opts.y + rect.y + rect.h / 4) ; aim towards top for upwards moving text
+    logger.info("Clicking " x ", " y)
+    ops.mouseMove(x, y)
+    Sleep(20)
     ops.click(x, y)
 }
