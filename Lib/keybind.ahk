@@ -163,7 +163,7 @@ class InputMapping {
         SplitPath(dbdPath, &fileName)
         platform := ""
         switch fileName {
-            case "DeadByDaylight-EGS-Shipping.exe": platform := "EGS"
+            case "DeadByDaylight-EGS-Shipping.exe": platform := "EGSClient"
             case "DeadByDaylight-Win64-Shipping.exe": platform := "WindowsClient"
             case "DeadByDaylight-WinGDK-Shipping.exe": platform := "WinGDKClient"
             Default: throw Error("Unrecognized DBD process path: " dbdPath)
