@@ -64,9 +64,8 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 
 ### Repair Speed Tracker
 - Tracks repair speed over time for analyzing builds and identifying perk interaction bugs.
-- Shows repair speed in the HUD over:
-  - the past 2 seconds
-  - the whole gen
+- Shows repair speed in the HUD over the past 2 seconds and the whole gen.
+  ![Repair speed shown next to character HUD](assets/repair.webp)
 - Optional: exports raw data to a TSV file in `%TEMP%\repair` named like `2025-09-25_22-09-21 repair 58 pct in 41.9 sec 1.24 cps.tsv`
 - Pausing/resuming repair for up to 5 seconds is considered the same repair session (e.g. bounce tech, switching toolbox)
 - Create pretty graphs in google sheets, excel, or your tool of choice
