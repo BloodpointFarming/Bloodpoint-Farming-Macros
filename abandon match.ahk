@@ -48,8 +48,8 @@ abandonMatch() {
     confirmButton := doWithRetriesUntilF(
         () => clickWord(abandonButtonBottomRight),
         findAbandonConfirmButton,
-        1000,
-        250
+        3000,
+        100
     )
     if not confirmButton
         return
@@ -61,8 +61,11 @@ clickWord(word) {
     rect := word.BoundingRect
     x := Integer(word.opts.x + rect.x + rect.w / 2)
     y := Integer(word.opts.y + rect.y + rect.h / 4) ; aim towards top for upwards moving text
-    logger.info("Clicking " x ", " y)
-    ops.mouseMove(x, y)
-    Sleep(20)
-    ops.click(x, y)
+    logger.debug("Clicking " x ", " y)
+
+    moveAndClick() {
+        ops.mouseMove(x, y)
+        Click(x, y)
+    }
+    withMouseBlocked(moveAndClick)
 }
