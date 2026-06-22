@@ -15,7 +15,7 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 ### Autospend
 - F6 to purchase tagged items from the bloodweb using the [fast bloodweb tech](https://www.reddit.com/r/deadbydaylight/s/njguTZBODp).
   - ⚠️ this can cause DBD to bug out until restarted.
-  - Disabled by default. Edit the macro to set `useBloodwebCycling := true` to enable.
+  - Enabled by default. Edit the macro and set `useBloodwebCycling := false` to disable.
 - Demo: https://youtu.be/h3Yr9y5W7GU
 - Supports 1080p and 1440p resolutions at 100% UI scale only. Run windowed at these resolutions if you need to. Disable filters if they interfere.
 - Use [NightLight](https://nightlight.gg/desktop) to tag the icons you want prioritized from the 🟥 🟪 🟦 🟩 🟫 version of the [bloodpoint-farming-autospender icon pack](https://nightlight.gg/packs/bloodpointfarmingautospender). Untagged items are autopurchased.

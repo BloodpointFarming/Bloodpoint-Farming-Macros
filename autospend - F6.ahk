@@ -1,8 +1,8 @@
 ﻿#Requires AutoHotkey v2+
-/*
-Bloodweb autospender using the speed tech from:
-https://www.reddit.com/r/deadbydaylight/s/njguTZBODp
-*/
+/**
+ * Fast Bloodweb autospender using speed techs.
+ * See README.md for usage.
+ */
 #HotIf WinActive(dbdWinTitle)
 #Include Lib\common.ahk
 #Include Lib\bloodweb.ahk
@@ -16,22 +16,14 @@ setTrayIcon("icons/autopurchase.ico")
 debug := false
 
 /**
- * Autopurchase when there are no more nodes of interest that require claiming.
- * Can be disabled for debugging to test individual node claiming.
- */
-useAutopurchase := true
-
-/**
- * Uses the bulk spend between level 50 and 10.
- */
-useBulkSpend := true
-
-/**
  * Should we use the fast bloodweb tech?
  * In some versions of the game, this causes DBD to bug out until restarted.
  */
-useBloodwebCycling := false
+useBloodwebCycling := true
 
+/**
+ * Manual spend offers no benefits on levels 1-10.
+ */
 bulkSpendToLevel := 10
 
 bw := Bloodweb([], [], [])
@@ -118,12 +110,17 @@ openBloodwebTab() {
 
 autospend() {
     while shouldKeepRunning() {
-        level := getBloodwebLevel()
+        state := { level: -1 } ; {} to allow arrow function to mutate thiss
+        if not waitUntilF(() => (state.level := getBloodwebLevel()) > 0, 5000) {
+            logger.info("Level did not appear. Opening bloodweb.")
+            coords.click(bloodwebTab) ; bloodweb tab
+            continue
+        }
+        level := state.level
         logger.info("Level " level)
 
         if (level > 0 && prevLevel != level or Bloodweb.isP100) {
             ; Cancel the bloodweb loading animation
-            cycleBloodweb()
             setPrevLevel(level)
         }
 
@@ -141,78 +138,32 @@ autospend() {
                 openBloodwebTab()
             }
         }
+        bloodwebLoadedAt := A_TickCount
+        logger.info("Bloodweb loaded.")
 
         ; If we resume at low levels, bulk spend.
-        if useBulkSpend and level > 0 and level < bulkSpendToLevel {
+        if level > 0 and level < bulkSpendToLevel or isGuranteedLevel(level) {
             bulkSpend()
             continue
         }
+
+        ; I've observed up to ~200 ms between the APB showing as loaded and the icons loading in.
+        Sleep(200 - (A_TickCount - bloodwebLoadedAt))
 
         ; Buy specific items
-        if !useAutopurchase or !isGuranteedLevel(level) {
-            if shouldKeepRunning()
-                buyMarkedItems()
-        }
+        if shouldKeepRunning()
+            buyMarkedItems()
 
-        ; Bulk spend at level 50 after picking out the things we want. Skip the prestige interstitial.
-        if useBulkSpend and level = 50 and !Bloodweb.isP100() {
-            bulkSpend()
-            continue
-        }
-
-        if useAutopurchase {
-            ; Autopurchase untagged items.
-            autoPurchase()
-        }
+        ; Bulk to advance the level.
+        bulkSpend()
     }
 }
 
-autoPurchase() {
-    ; Left of the button to avoid tooltip.
-    apbLeftRed := dbdWindow.height = 1440 ? Coords2K(884, 756) : Coords1080(663, 563)
-    isP100 := Bloodweb.isP100()
-    logger.info("isP100=" isP100)
-
-    hasRedDisappeared := false
-    isAutoPurchaseComplete() {
-        if !shouldKeepRunning()
-            return true
-
-        if isP100 {
-            ; We can't rely on the level changing. It stays 50 forever.
-            ; For lack of anything better, we're going to watch for the red button
-            ; to disappear and reappear. This is suboptimal, but I'm out of time to
-            ; think of something better.
-            color := coords.getColor(apbLeftRed)
-            hsv := colorToHSV(color)
-            h := hsv.hue
-            s := hsv.sat
-            redishNow := (h > 350 or h < 15) and s > 0.5 ; isRedish() can't handle red this dark.
-
-            if !hasRedDisappeared and !redishNow {
-                logger.debug("No longer redish: " Format("{:06X}", color))
-                hasRedDisappeared := true
-            }
-
-            redReturned := hasRedDisappeared and redishNow
-            return redReturned
-        } else {
-            return hasLevelChanged()
-        }
-    }
-
-    clickAutopurchase()
-    ; Retry until something happens.
-    doWithRetriesUntilF(
-        action := clickAutopurchase,
-        predicate := isAutoPurchaseComplete,
-        maxDurationMs := 10000,
-        timeBetweenRetries := 300
-    )
-}
+levelsToLimit() => bulkSpendToLevel - Mod(prevLevel, 50)
 
 bulkSpend() {
-    logger.info("Bulk spending to level " bulkSpendToLevel)
+    levels := prevLevel = 50 ? levelsToLimit() : 1
+    logger.info("Bulk spending " levels " level(s)")
 
     ; Open bulk dialog
     waitUntilF(() => Bloodweb.isBulkSpendVisible())
@@ -220,38 +171,32 @@ bulkSpend() {
 
     Sleep(100) ; it loads fast. probably overkill.
 
-    ; Set levels
-    levels := bulkSpendToLevel - Mod(prevLevel, 50) - 1
-    loop levels {
+    loop levels - 1 {
         coords.click(Bloodweb.bulkSpendLevelPlusButton)
         Sleep(20)
     }
 
     ; Confirm purchase (this button doesn't register clicks reliably, so we must spam)
     doWithRetriesUntilF(
-        action := () => slowClick(Bloodweb.bulkSpendConfirmButton, 100),
-        predicate := () => !Bloodweb.isBulkSpendConfirmButtonVisible(),
-        maxDurationMs := 2000,
-        timeBetweenRetries := 200
+        () => slowClick(Bloodweb.bulkSpendConfirmButton, 100),
+        () => !Bloodweb.isBulkSpendConfirmButtonVisible(),
+        2000,
+        200
     )
+    cycleBloodweb()
     ops.mouseMove(0, 0) ; don't depend on red hover glow for next step. user may move mouse.
 
-    ; Done
-    waitUntilF(() => Bloodweb.isBulkSpendOkVisible(), 5000)
-    doWithRetriesUntilF(
-        action := () => slowClick(Bloodweb.bulkSpendOkButtonRed, 100),
-        predicate := () => !Bloodweb.isBulkSpendOkVisible(),
-        maxDurationMs := 1000,
-        timeBetweenRetries := 200
-    )
-}
+    isDone() {
+        level := getBloodwebLevel()
+        return prevLevel != level or (level == 50 and Bloodweb.isP100())
+    }
 
-clickAutopurchase() {
-    if useAutopurchase {
-        logger.info("Clicking autopurchase.")
-        slowClick(Bloodweb.autopurchaseButton)
-    } else {
-        logger.info("Suppressed: Clicking autopurchase.")
+    if not waitUntilF(isDone, 5000) {
+        logger.warn("Bloodweb did not advance within 5s?")
+        ; Recover? Ignore? Handle bulk spend OK prompt?
+        if Bloodweb.isBulkSpendOkVisible() {
+            slowClick(Bloodweb.bulkSpendOkButtonRed, 100)
+        }
     }
 }
 
@@ -311,6 +256,7 @@ buyMarkedItems() {
     ;     buyItemsAtPoints(bw.innerRing, screenshot)
     ; }
     saveScreenshot(screenshot)
+    sw.label := "Buying " approxNodesConsumed " items"
     sw.report()
 }
 
@@ -341,10 +287,10 @@ buyItemsAtPoints(points, screenshot) {
             ; Node was of interest at the time the screnshot was taken
             waitUntilF(() => !Bloodweb.isLoading(), 3000)
             doWithRetriesUntilF(
-                action := () => clickNode(node),
-                predicate := () => !node.isTeal(coords) or !enabled,
-                maxDurationMs := 5000,
-                timeBetweenRetries := 2000
+                () => clickNode(node),
+                () => !node.isTeal(coords) or !enabled,
+                5000,
+                2000
             )
             approxNodesConsumed += node.depth
         }
@@ -386,12 +332,18 @@ setBloodwebSize() {
 }
 
 cycleBloodweb() {
+    static tomesCoords := Coords2K(574, 1341)
     ; Closing and opening the bloodweb skips the "level" interstitial
     if useBloodwebCycling {
+        if not isTomeButtonVisible() {
+            logger.info("Waiting for tome button")
+            waitUntilF(isTomeButtonVisible, 5000)
+        }
+
         logger.info("Cycling bloodweb")
-        coords.click(bloodwebTab) ; bloodweb tab
-        Sleep(100)
-        coords.click(bloodwebTab)
+        coords.click(tomesCoords)
+        Sleep(50)
+        Send("{ESC}")
     } else {
         logger.info("Waiting for bloodweb to fully appear")
         ; This appears to be required to prevent the next section from autoclicking immediately. Didn't look into why.
@@ -414,12 +366,36 @@ clickNode(node) {
     scaled.mouseMove(0, 0)
 }
 
-expectedNextLevel() {
-    if (prevLevel = 50)
-        return 1
-    return prevLevel + 1
-}
-
 bloodwebTab := Coords2K(201, 459)
-characterTab := Coords2K(201, 143)
 topLeft := Coords2K(0, 0)
+
+
+isTomeButtonVisible() {
+    /**
+     * The tome button is neither fully black or white.
+     * Instead, we'll use the [ESC] prompt which is the only guaranteed white pixels on the screen.
+     * Unfortunately, position can very based on user language, so we'll:
+     * 1. grab the whole region
+     * 2. cache a white pixel when we find it
+     * This should be resilient to UI changes and reshade filters and performant.
+     */
+    static whitePxCoords := false
+    isWhiteEnough(color) => isWhiteish(color, 0xFD)
+    if whitePxCoords {
+        return isWhiteEnough(coords.getColor(whitePxCoords))
+    } else {
+        rx := 0
+        rw := 309 / 1920 * dbdWindow.width
+        ry := Integer((950 / 1080) * dbdWindow.height)
+        rh := dbdWindow.height - ry
+        img := PBitmapImage.of(rx, ry, rw, rh)
+        for x, y, color in img {
+            if isWhiteish(color, 0xFD) {
+                whitePxCoords := CoordsBase(x + rx, y + ry, dbdWindow.width, dbdWindow.height)
+                logger.info("Found [ESC] at (" whitePxCoords.x ", " whitePxCoords.y ")")
+                return true
+            }
+        }
+        return false
+    }
+}
