@@ -45,13 +45,15 @@ class TestLogger extends LoggerOps {
                 match := ""
                 if RegExMatch(lines[3], "(.*?) \((\d+)\) : \[([^]]*)\] .*", &match) {
                     path := match[1]
+                    path := RegExReplace(path, "^.*?\\Bloodpoint-Farming-Macros\\", "")
                     line := match[2]
                     method := match[3]
-                    filename := RegExReplace(path, "^.*?\\Bloodpoint-Farming-Macros\\", "")
+                    isAbsolute := SubStr(path, 2, 1) == ":"
+                    filename := isAbsolute ? path : (".\" path)
                 }
             }
         }
-        vsCodeRef := ".\" filename ":" line
+        vsCodeRef := filename ":" line
         FileAppend(method ": " msg " [" vsCodeRef "]`n", "*")
     }
     error(msg) => this.write("error", msg)
@@ -129,7 +131,8 @@ setupFakeWindow(screenshotPath) {
 assertFor(screenshot, predicate) {
     screenshotPath := A_ScriptDir "\screenshots\" screenshot
     pBitmap := setupFakeWindow(screenshotPath)
-    Yunit.Assert(predicate.Call())
+    if not predicate.Call()
+        throw Error("FAIL", -1)
     Gdip_DisposeImage(pBitmap)
     return true
 }
