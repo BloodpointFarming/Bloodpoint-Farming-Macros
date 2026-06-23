@@ -100,11 +100,9 @@ isBlackish(color, threshold := 0x40, tolerance := 5) {
 
 isRedish(color) {
     r := (color >> 16) & 0xFF
-    g := (color >> 8) & 0xFF
-    b := color & 0xFF
-    hsl := RGBtoHSL(r, g, b)
-    hue := hsl[1]
-    sat := hsl[2]
+    hsl := colorToHSV(color)
+    hue := hsl.hue
+    sat := hsl.sat
 
     ; Reddish hue range: 0–20 or 340–360
     return (hue <= 20 || hue >= 340) and sat > 0.6 and r > 0x50
