@@ -16,11 +16,6 @@ class SettingsTests {
     test_matchDetailsAbandonHover() => assertFor("match\matchDetailsAbandonHover1440.png", findMatchDetailsAbandonButton)
     test_abandonConfirmButton() => assertFor("match\abandonConfirm1440.png", findAbandonConfirmButton)
 
-    test_isDbdFinishedLoading_1440() => assertFor("mainmenu\mainmenu_1440.png", isDbdFinishedLoading.Bind())
-    test_isDbdFinishedLoading_1080() => assertFor("mainmenu\mainmenu_1080.png", isDbdFinishedLoading.Bind())
-    test_isDbdFinishedLoading_Bloodweb1440() => assertFor("bloodweb\bloodweb_1080_level20.png", isDbdFinishedLoading.Bind())
-    test_isDbdFinishedLoading_Bloodweb1080() => assertFor("bloodweb\bloodweb_1440_level32.png", isDbdFinishedLoading.Bind())
-
     test_isHookSpaceOptionAvailable_1440() => assertFor("match\matchHook1440.png", isHookSpaceOptionAvailable.Bind())
     test_isHookSpaceOptionAvailable_1080() => assertFor("match\matchHook1080.png", isHookSpaceOptionAvailable.Bind())
     test_isHookSpaceOptionAvailable_1440Reshade() => assertFor("match\matchHookReshade1440.png", isHookSpaceOptionAvailable.Bind())

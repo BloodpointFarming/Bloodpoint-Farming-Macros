@@ -8,20 +8,6 @@
 #Include pixel_check.ahk
 #Include subscreenshot.ahk
 
-isDbdFinishedLoading() {
-    ; The text of the ESC button moves around at different resolutions.
-    ; The gear icon is more stable. Check the rightmost spoke for whiteishness.
-    escText := scaled.getColor(438, 1350)
-    escTextIsWhite := isWhiteish(escText, 0x70)
-
-    ; Main menu: Middle of the red '<' arrow
-    ; Can be a dark red without reshade filters, so we must look at hue rather than red component intensity
-    backArrow := scaled.getColor(137, 1345)
-    backArrowIsRed := isRedish(backArrow)
-
-    return escTextIsWhite && backArrowIsRed
-}
-
 getBloodwebLevel() {
     static opts := {}
     static dbdWidth := -1
