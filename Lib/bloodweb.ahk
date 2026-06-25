@@ -58,7 +58,7 @@ class Bloodweb {
                     Bloodweb.Node(1198, 711, 2), ; 2:30
                     Bloodweb.Node(1114, 563, 2), ; 1:30
                     Bloodweb.Node(793, 1104, 2), ; 6:30
-                    Bloodweb.Node(958, 480, 2), ; 12:30
+                    Bloodweb.Node(958, 480, 2, 992, 417), ; 12:30
                     Bloodweb.Node(639, 1021, 2), ; 7:30
                     Bloodweb.Node(793, 480, 2), ; 11:30
                     Bloodweb.Node(638, 562, 2), ; 10:30
@@ -209,12 +209,19 @@ class Bloodweb {
     }
 
     class Node {
-        __New(x, y, depth) {
+        __New(x, y, depth, clickX?, clickY?) {
             this.bottomLeft := CoordsBase(x, y, dbdWindow.width, dbdWindow.height)
             this.depth := depth
 
             centerOffset := scaled.scaleX(30)
-            this.center := this.bottomLeft.copy(this.bottomLeft.x + centerOffset, this.bottomLeft.y - centerOffset)
+            if (IsSet(clickX) and IsSet(clickY)) {
+                /**
+                 * There are some nodes that have dead zones and need special-casing.
+                 */
+                this.center := CoordsBase(clickX, clickY, dbdWindow.width, dbdWindow.height)
+            } else {
+                this.center := this.bottomLeft.copy(this.bottomLeft.x + centerOffset, this.bottomLeft.y - centerOffset)
+            }  
 
             this.topLeft := this.bottomLeft.copy(, this.bottomLeft.y - Ceil(scaled.scaleX(65)))
         }

@@ -23,8 +23,11 @@ useBloodwebCycling := true
 
 /**
  * Manual spend offers no benefits on levels 1-10.
+ * TODO: there's a bug that fails to detect P100 bloodwebs
+ * causing it to bulk spend extra levels at P100.
+ * This should be set to 1 for now.
  */
-bulkSpendToLevel := 10
+bulkSpendToLevel := 1
 
 bw := Bloodweb([], [], [])
 toolTipLocation := Coords2K(518, 150) ; Under character name and level
@@ -153,6 +156,9 @@ autospend() {
         ; Buy specific items
         if shouldKeepRunning()
             buyMarkedItems()
+
+        if not shouldKeepRunning()
+            break
 
         ; Bulk to advance the level.
         bulkSpend()
@@ -290,7 +296,7 @@ buyItemsAtPoints(points, screenshot) {
                 () => clickNode(node),
                 () => !node.isTeal(coords) or !enabled,
                 5000,
-                2000
+                250
             )
             approxNodesConsumed += node.depth
         }
