@@ -246,9 +246,9 @@ class Bloodweb {
         aboveBlack := coords.getColor(button.copy(, button.y - scaled.scaleY(60)))
         return (aboveBlack & 0xFFFFFF) = 0
     }
-    static bulkSpendOkButtonRed := Coords2K(2021, 1120)
+    static bulkSpendOkButtonRed := Coords2K(2013, 1114)
     static isBulkSpendOkVisible() => isRedish(coords.getColor(Bloodweb.bulkSpendOkButtonRed))
 
-    static p100OneWhite := Coords2K(403, 83)
+    static p100OneWhite := Coords2K(414, 94)
     static isP100() => isWhiteish(coords.getColor(Bloodweb.p100OneWhite), 0xF0)
 }
