@@ -250,5 +250,5 @@ class Bloodweb {
     static isBulkSpendOkVisible() => isRedish(coords.getColor(Bloodweb.bulkSpendOkButtonRed))
 
     static p100OneWhite := Coords2K(414, 94)
-    static isP100() => isWhiteish(coords.getColor(Bloodweb.p100OneWhite), 0xF0)
+    static isP100() => isWhiteish(coords.getColor(Bloodweb.p100OneWhite), 0xE0, 10)
 }

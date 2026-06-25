@@ -277,7 +277,7 @@ bulkSpend() {
 
     isAdvancedToNextLevel() {
         level := getBloodwebLevel()
-        return prevLevel != level or (level == 50 and Bloodweb.isP100()) and isBloodwebLoaded()
+        return (prevLevel != level or (level == 50 and Bloodweb.isP100())) and isBloodwebLoaded()
     }
 
     while not waitUntilF(isAdvancedToNextLevel, 5000) {
