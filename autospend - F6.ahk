@@ -261,7 +261,7 @@ bulkSpend() {
     if useBulkSpendAnimationCancel {
         cycleTomesButton()
     } else {
-        if waitUntilF(() => Bloodweb.isBulkSpendOkVisible(), 5000) {
+        if waitUntilF(() => Bloodweb.isBulkSpendOkVisible(), 7000) {
             logger.info("Clearing bulk spend results.")
 
             doWithRetriesUntilF(
@@ -281,6 +281,8 @@ bulkSpend() {
     }
 
     while not waitUntilF(isAdvancedToNextLevel, 5000) {
+        logger.info("Level did not advance. Trying things...")
+        clickBulkSpendOkIfPresent()
         cycleBloodwebTab()
     }
 }
