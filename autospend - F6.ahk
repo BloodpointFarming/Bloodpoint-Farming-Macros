@@ -272,6 +272,7 @@ bulkSpend() {
             )
         }
     }
+    logger.info("Bulk spend cleared.")
 
     ops.mouseMove(0, 0) ; don't depend on red hover glow for next step. user may move mouse.
 

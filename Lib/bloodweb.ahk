@@ -203,9 +203,9 @@ class Bloodweb {
     static bloodwebErrorBarOutsideBloodwebRed := Coords2K(2166, 524)
     static isBloodwebError() {
         return isRedish(coords.getColor(Bloodweb.bloodwebErrorBarOutsideBloodwebRed)) and
-        isRedish(coords.getColor(Bloodweb.bloodwebErrorOkButtonRed)) and
-        isBlackish(coords.getColor(Bloodweb.bloodwebErrorOkButtonBlack), , tolerance := 16) and
-        isWhiteish(coords.getColor(Bloodweb.bloodwebErrorOkButtonWhite), , tolerance := 16)
+            isRedish(coords.getColor(Bloodweb.bloodwebErrorOkButtonRed)) and
+            isBlackish(coords.getColor(Bloodweb.bloodwebErrorOkButtonBlack), , tolerance := 16) and
+            isWhiteish(coords.getColor(Bloodweb.bloodwebErrorOkButtonWhite), , tolerance := 16)
     }
 
     class Node {
@@ -221,7 +221,7 @@ class Bloodweb {
                 this.center := CoordsBase(clickX, clickY, dbdWindow.width, dbdWindow.height)
             } else {
                 this.center := this.bottomLeft.copy(this.bottomLeft.x + centerOffset, this.bottomLeft.y - centerOffset)
-            }  
+            }
 
             this.topLeft := this.bottomLeft.copy(, this.bottomLeft.y - Ceil(scaled.scaleX(65)))
         }
@@ -247,7 +247,12 @@ class Bloodweb {
         return (aboveBlack & 0xFFFFFF) = 0
     }
     static bulkSpendOkButtonRed := Coords2K(2013, 1114)
-    static isBulkSpendOkVisible() => isRedish(coords.getColor(Bloodweb.bulkSpendOkButtonRed))
+    static bulkSpendOkButtonWhite := Coords2K(1985, 1117)
+
+    static isBulkSpendOkVisible() {
+        return isRedish(coords.getColor(Bloodweb.bulkSpendOkButtonRed)) and
+            isWhiteish(coords.getColor(Bloodweb.bulkSpendOkButtonWhite), 0x80)
+    }
 
     static p100OneWhite := Coords2K(414, 94)
     static isP100() => isWhiteish(coords.getColor(Bloodweb.p100OneWhite), 0xE0, 10)
