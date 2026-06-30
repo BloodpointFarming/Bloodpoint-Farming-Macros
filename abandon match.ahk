@@ -39,7 +39,7 @@ abandonMatch() {
     ; Full process of abandoning the match.
     logger.info("Abandon sighted.")
 
-    Send("{Tab}")
+    Send("{ESC}")
     abandonButtonBottomRight := waitUntilF(findMatchDetailsAbandonButton, 500)
     if not abandonButtonBottomRight
         return
