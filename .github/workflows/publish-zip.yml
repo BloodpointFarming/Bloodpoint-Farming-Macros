@@ -25,7 +25,7 @@ jobs:
       - name: Create ZIP
         run: |
           mkdir output
-          zip -r output/Bloodpoint-Farming-Macros.zip *.ahk Lib icons/*.ico
+          zip -r output/Bloodpoint-Farming-Macros.zip *.ahk Lib icons/*.ico README.md
 
       - name: Upload static files as artifact
         id: deployment
