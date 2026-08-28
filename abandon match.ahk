@@ -64,8 +64,9 @@ clickWord(word) {
     logger.debug("Clicking " x ", " y)
 
     moveAndClick() {
-        ops.mouseMove(x, y)
-        Click(x, y)
+        Click(x, y, "Down")
+        Sleep(50)
+        Click(x, y, "Up")
     }
     withMouseBlocked(moveAndClick)
 }

@@ -11,6 +11,6 @@ CheckContinueButton() {
         return
 
     if isTallyScreen() {
-        coords.click(tallyContinueButtonRed)
+        coords.hold(tallyContinueButtonRed, 50)
     }
 }

@@ -47,6 +47,12 @@ class CoordsOps {
         return ops.click(scaledX, scaledY, options)
     }
 
+    hold(coords, duration := 50) {
+        this.click(coords, "Down")
+        Sleep(duration)
+        this.click(coords, "Up")
+    }
+
     getColor(coords) {
         scaledX := coords.scaledX()
         scaledY := coords.scaledY()
