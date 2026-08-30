@@ -41,8 +41,14 @@ WinSetTransColor(0)  ; set black as transparent
     global
     now := A_TickCount
     millisSinceLastHit := now - lastHitTimestamp
-    ; STBFL=8 is ~2000 ms
-    if (millisSinceLastHit > 2000) {
+    
+    /**
+     * Per Janse,
+     * one basekit swing with no stacks is 2700 mili sec cooldown
+     * new STBFL is 40% at max stacks, 40% of 2700 mili sec is 1080 mili sec.
+     * One new swing at 8 stacks is 1620 mili sec cooldown, so new grace period should be 1500 mili sec
+     */
+    if (millisSinceLastHit > 1500) {
         lastHitTimestamp := now
         setCounter(counter + 1)
     }
