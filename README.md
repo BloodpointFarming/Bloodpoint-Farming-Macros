@@ -83,11 +83,6 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 - `Ctrl+` and `Ctrl-` to manually set (if necessary)
 - `Ctrl+R` to reset to 0.
 
-### Killer Autohook
-- Hooks a carried survivor when possible.
-- Adds years of life to your keyboard's spacebar.
-- UI scale must be 100%
-
 ## Automatic Updates
 Scripts automatically check for updates and ask to update when new fixes and macros are added.
 
