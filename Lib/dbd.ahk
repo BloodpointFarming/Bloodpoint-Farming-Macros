@@ -80,20 +80,6 @@ findAbandonText(tl, br) {
     return result.findWord("ABANDON")
 }
 
-isHookSpaceOptionAvailable() {
-    ; Head of the "carried survivor" icon.
-    ; Chosen because it is not white in the same spot as the "Blight Rush" icon.
-    colorHead := scaled.getColor(227, 1254)
-
-    ; White part of the 'A' of the "[SPACE] HANG" prompt.
-    colorSpaceA := scaled.getColor(1235, 1265)
-
-    ; Black background of the "[SPACE] HANG" prompt to disqualify an all white screen.
-    colorSpaceBg := scaled.getColor(1235, 1269)
-
-    return colorHead = 0xFFFFFF && colorSpaceA = 0xFFFFFF && colorSpaceBg = 0x000000
-}
-
 tallyLeftArrowWhite := Coords2K(367, 1196)
 tallyLeftArrowDark := Coords2K(353, 1193)
 
@@ -117,38 +103,19 @@ isTallyScreen() {
 tallyScoreMatchText := Coords2K(158, 630)
 isTallyBloodpointsScreen() => isWhiteish(coords.getColor(tallyScoreMatchText), threshold := 0xF8)
 
-cancelButtonRedMarker := Coords2K(2433, 1283)
-isReadiedUp() => isRedish(coords.getColor(cancelButtonRedMarker))
+isReadiedUp() => isRedish(coords.getColor(Coords2K(2364, 1284)))
 
 isReadyButtonVisible() {
-    static y := 1257
-    static readyButtonRedBar := Coords2K(2430, y)
-    static xWhiteish := [2283, 2304, 2330, 2356, 2390]
-    static xNotWhiteish := [2297, 2323, 2337, 2363, 2381]
-    static screenshotBounds := [Coords2K(2283, y), Coords2K(2430, y)]
+    ; READY/PLAY but not CANCEL
+    static isText := c => isWhiteish(c, 0xc0)
+    static notText := c => not isWhiteish(c, 0xc0)
 
-    ss := Subscreenshot.ofPoints(screenshotBounds)
-
-    if not isRedish(ss.getColor(readyButtonRedBar))
-        return false
-
-    for x in xWhiteish {
-        if not isWhiteish(ss.getColor(Coords2K(x, y)), threshold := 0x90)
-            return false
-    }
-
-    for x in xNotWhiteish {
-        if isWhiteish(ss.getColor(Coords2K(x, y)), threshold := 0x90)
-            return false
-    }
-
-    return true
-}
-
-isQVisible() {
-    topLeft := Coords2K(392, 1113)
-    botRight := Coords2K(432, 1156)
-    counts := countPureColors(Subscreenshot.ofPoints([topLeft, botRight]).img)
-    ratioBlack := counts.black / counts.size
-    return ratioBlack > 0.3 and counts.white >= 2
+    static check := PixelCheck.ForAll(
+        PixelCheck(Coords2K(1906, 1312), isText),
+        PixelCheck(Coords2K(1931, 1312), isText),
+        PixelCheck(Coords2K(1969, 1312), isText),
+        PixelCheck(Coords2K(1913, 1312), notText),
+        PixelCheck(Coords2K(1959, 1312), notText),
+    )
+    return check(coords)
 }

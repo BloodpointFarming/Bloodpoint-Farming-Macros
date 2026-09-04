@@ -18,7 +18,7 @@ CheckReadyButton() {
     if (!dbdWindow.isActive())
         return
 
-    if (enabled and isReadyButtonVisible() and !isReadiedUp()) {
+    if (enabled and isReadyButtonVisible()) {
         readyUp()
     }
 }
@@ -41,9 +41,8 @@ readyUp() {
     MouseMove(initialX, initialY, 0)
 }
 
-readyButtonWhiteR := Coords2K(2278, 1260)
 clickReadyButton() {
-    coords.mouseMove(readyButtonWhiteR)
+    coords.mouseMove(button.center)
     Sleep(20)
     Click("down, Left")
     Sleep(50)
@@ -69,9 +68,16 @@ clickReadyButton() {
     }
 }
 
+button := {
+    tl: Coords2K(1875, 1237),
+    br: Coords2K(2442, 1369),
+}
+button.center := Coords2K((button.br.x + button.tl.x) / 2, (button.br.y + button.tl.y) / 2)
+
 isMouseInReadyButtonRegion() {
     MouseGetPos(&mx, &my)
-    result := mx >= scaled.scaleX(2068) && mx <= scaled.scaleX(2445) && my >= scaled.scaleY(1213) && scaled.scaleY(my) <= 1301
+    result := mx >= button.tl.scaledX() && mx <= button.br.scaledX() &&
+        my >= button.tl.scaledY() && my <= button.br.scaledY()
     logger.debug("isMouseInReadyButtonRegion(" mx ", " my ") => " result)
     return result
 }
@@ -87,8 +93,8 @@ setEnabled(newIsEnabled) {
 
 showStatusToolTip() {
     msg := "Auto-ready " (enabled ? "ON" : "off") "."
-    x := readyButtonWhiteR.x
-    y := readyButtonWhiteR.y - scaled.scaleY(70) ; above ready button
+    x := button.center.scaledX()
+    y := button.center.scaledY()
     ToolTip(msg, x, y)
     SetTimer(ToolTip.Bind(), -3000)
 }
