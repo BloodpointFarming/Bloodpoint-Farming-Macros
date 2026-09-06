@@ -11,4 +11,4 @@ if FileExist(au.lastUpdateCheckFile)
 
 au.UpdateIfNewVersion()
 
-MsgBox("Nothing to do.", "Done")
+MsgBox("You're up to date!", "Done")
