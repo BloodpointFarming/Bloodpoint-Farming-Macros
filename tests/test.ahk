@@ -5,7 +5,6 @@
 #Include InputMappingTests.ahk
 #Include PixelCheckTests.ahk
 #Include PregameTests.ahk
-#Include QTests.ahk
 #Include SettingsTests.ahk
 #Include StringsTests.ahk
 #Include TallyTests.ahk
@@ -19,7 +18,6 @@ Yunit
         InputMappingTests,
         PixelCheckTests,
         PregameTests,
-        QTests,
         SettingsTests,
         StringsTests,
         TallyTests,
