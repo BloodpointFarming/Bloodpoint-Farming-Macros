@@ -128,9 +128,9 @@ setupFakeWindow(screenshotPath) {
     return pBitmap
 }
 
-assertFor(screenshot, predicate) => assertForFile(A_ScriptDir "\screenshots\" screenshot, predicate)
+assertFor(screenshot, predicate) => assertForScreenshot(A_ScriptDir "\screenshots\" screenshot, predicate)
 
-assertForFile(file, predicate) {
+assertForScreenshot(file, predicate) {
     screenshotPath := file
     try {
         pBitmap := setupFakeWindow(screenshotPath)

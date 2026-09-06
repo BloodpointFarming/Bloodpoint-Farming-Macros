@@ -33,7 +33,7 @@ class PBitmapImage {
 
     getColor(x, y) {
         if (x < 0 || y < 0)
-            throw Error("Coordinates must be non-negative (" x, ", " y ")")
+            throw Error("Coordinates must be non-negative (" x ", " y ")")
         if x >= this.width
             throw Error("(" x ", " y ") x out of bounds for " this.width "x" this.height)
         if y >= this.height

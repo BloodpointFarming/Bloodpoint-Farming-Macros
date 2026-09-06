@@ -37,6 +37,9 @@ colorToHSL(color) {
     return RGBtoHSL(r, g, b)
 }
 
+/**
+ * @returns {Object} {hue: 0-360, sat: 0-0xFF, v: 0-0xFF}
+ */
 colorToHSV(color) {
     r := (color >> 16) & 0xFF
     g := (color >> 8) & 0xFF

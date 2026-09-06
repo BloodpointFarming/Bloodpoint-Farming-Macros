@@ -4,8 +4,8 @@
 #Include blocking.ahk
 #Include constants.ahk
 
-CoordMode "Pixel", "Client"
-CoordMode "Mouse", "Client"
+CoordMode "Pixel", "Screen"
+CoordMode "Mouse", "Screen"
 
 dbdWindow := DbdWindowOps()
 ops := WindowOps()
@@ -43,12 +43,25 @@ class DbdWindowOps {
  * Wrapper around default operations so we can DI fakes for testing.
  */
 class WindowOps {
-    click(x, y, options := "") {
-        withMouseBlocked(() => Click(x " " y " " options))
+    clientToScreen(x, y) {
+        WinGetClientPos(&clientX, &clientY,,, dbdWinTitle)
+        return [clientX + x, clientY + y]
     }
 
-    mouseMove(x, y) => MouseMove(x, y)
-    getColor(x, y) => (PixelGetColor(x, y) & 0xFFFFFF)
+    click(x, y, options := "") {
+        screenPos := this.clientToScreen(x, y)
+        withMouseBlocked(() => Click(screenPos[1] " " screenPos[2] " " options))
+    }
+
+    mouseMove(x, y) {
+        screenPos := this.clientToScreen(x, y)
+        MouseMove(screenPos[1], screenPos[2])
+    }
+
+    getColor(x, y) {
+        screenPos := this.clientToScreen(x, y)
+        return PixelGetColor(screenPos[1], screenPos[2]) & 0xFFFFFF
+    }
 }
 
 /**

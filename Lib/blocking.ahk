@@ -34,7 +34,7 @@ withMouseBlocked(f) {
     ; The `local` is important here or else the finally block will not close over the value of it.
     oldValue := setMouseBlocked(true)
     try {
-        f.Call()
+        return f.Call()
     } finally {
         setMouseBlocked(oldValue)
     }

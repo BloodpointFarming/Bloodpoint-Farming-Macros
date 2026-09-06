@@ -102,20 +102,3 @@ isTallyScreen() {
 
 tallyScoreMatchText := Coords2K(158, 630)
 isTallyBloodpointsScreen() => isWhiteish(coords.getColor(tallyScoreMatchText), threshold := 0xF8)
-
-isReadiedUp() => isRedish(coords.getColor(Coords2K(2364, 1284)))
-
-isReadyButtonVisible() {
-    ; READY/PLAY but not CANCEL
-    static isText := c => isWhiteish(c, 0xc0)
-    static notText := c => not isWhiteish(c, 0xc0)
-
-    static check := PixelCheck.ForAll(
-        PixelCheck(Coords2K(1906, 1312), isText),
-        PixelCheck(Coords2K(1931, 1312), isText),
-        PixelCheck(Coords2K(1969, 1312), isText),
-        PixelCheck(Coords2K(1913, 1312), notText),
-        PixelCheck(Coords2K(1959, 1312), notText),
-    )
-    return check(coords)
-}

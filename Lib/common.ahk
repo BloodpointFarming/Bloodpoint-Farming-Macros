@@ -19,6 +19,7 @@
 #Include tooltips.ahk
 
 #SingleInstance
+#WinActivateForce ; fails to focus otherwise
 Persistent
 
 SetMouseDelay(-1) ; Make cursor move instantly rather than mimicking user behavior

@@ -90,7 +90,7 @@ class Subscreenshot {
             return color
         } catch Error as e {
             ; corner case: window size can change between coords detection and 
-            if retries = 0
+            if retries <= 0
                 throw e
             else
                 this.getColor(point, retries - 1)

@@ -1,13 +1,15 @@
 #Requires AutoHotkey v2.0
 
+CoordMode("ToolTip", "Screen")
+
 /**
  * Some tooltip in a static location on screen.
  */
 class ToolTipInstance {
     static instanceId := 2
-    __New(x, y, WhichToolTip := ToolTipInstance.instanceId) {
-        this.x := x
-        this.y := y
+    __New(point, WhichToolTip := ToolTipInstance.instanceId) {
+        this.point := point
+        this.lastText := ''
         this.WhichToolTip := WhichToolTip
         ToolTipInstance.instanceId += 1
     }
@@ -18,8 +20,10 @@ class ToolTipInstance {
      * Displays the tooltip.
      */
     setText(text) {
-        x := HasMethod(this.x, "Call") ? this.x.Call() : this.x
-        y := HasMethod(this.y, "Call") ? this.y.Call() : this.y
+        this.lastText := text
+        WinGetClientPos(&clientX, &clientY,,, dbdWinTitle)
+        x := this.point.scaledX() + clientX
+        y := this.point.scaledY() + clientY
         ToolTip(text, x, y, this.WhichToolTip)
     }
 }

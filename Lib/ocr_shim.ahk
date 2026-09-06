@@ -106,6 +106,11 @@ class OCRShimFunctions {
     static fromScreen(opts) {
         opts.mode := 0 ; possibly unused, but set to a reasonable value for consistency
         img := capture.of(opts.x, opts.y, opts.w, opts.h)
-        return OCR.FromBitmap(img.pBitmap)
+        o := opts.Clone()
+        o.DeleteProp("x")
+        o.DeleteProp("y")
+        o.DeleteProp("w")
+        o.DeleteProp("h")
+        return OCR.FromBitmap(img.pBitmap, o)
     }
 }
