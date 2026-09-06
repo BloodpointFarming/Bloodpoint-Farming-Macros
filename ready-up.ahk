@@ -289,7 +289,7 @@ readyUp() {
         logger.info("Auto-ready Success!")
     } else {
         logger.warn("Ready up failed. Waiting before retry.")
-        Sleep(3000)
+        Sleep(500)
     }
 }
 
