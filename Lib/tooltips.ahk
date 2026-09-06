@@ -21,7 +21,15 @@ class ToolTipInstance {
      */
     setText(text) {
         this.lastText := text
-        WinGetClientPos(&clientX, &clientY,,, dbdWinTitle)
+        clientX := 0
+        clientY := 0
+        try {
+            if WinExist(dbdWinTitle)
+                WinGetClientPos(&clientX, &clientY, , , dbdWinTitle)
+        } catch Error as e {
+            logger.warn("WinGetClientPos failed.")
+        }
+
         x := this.point.scaledX() + clientX
         y := this.point.scaledY() + clientY
         ToolTip(text, x, y, this.WhichToolTip)
