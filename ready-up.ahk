@@ -79,7 +79,36 @@ state := {
      * Timestamp when we last auto-readied.
      */
     lastAutoReadied: 0,
+    /**
+     * When did the user last click in the button area?
+     */
+    lastReadyButtonClickAt: 0
 }
+
+~LButton:: {
+    if !WinActive(dbdWinTitle)
+        return
+
+    if isMouseInReadyButtonRegion() {
+        state.lastReadyButtonClickAt := A_TickCount
+    }
+}
+
+isMouseInReadyButtonRegion() {
+    static tl := Coords2K(1875, 1237), br := Coords2K(2442, 1369)
+    clientX := 0
+    clientY := 0
+    WinGetClientPos(&clientX, &clientY, , , dbdWinTitle)
+    MouseGetPos(&mx, &my)
+    mx -= clientX
+    my -= clientY
+    result :=
+        mx >= tl.scaledX() && mx <= br.scaledX() &&
+        my >= tl.scaledY() && my <= br.scaledY()
+    logger.debug("isMouseInReadyButtonRegion(" mx ", " my ") => " result)
+    return result
+}
+
 
 isActive() => config.requireFocus ? WinActive(dbdWinTitle) : WinExist(dbdWinTitle)
 
@@ -206,8 +235,10 @@ updateEnabledStatus(rs) {
         onReady()
     } else if previous == ReadyState.Ready and current == ReadyState.Present {
         if config.disableWhenUnreadySelected and
-            state.lastAutoReadied > state.periodStartAt and
-            state.lastAutoReadied - state.periodStartAt > 750 {
+            state.lastAutoReadied > state.periodStartAt and (
+                state.lastReadyButtonClickAt > state.lastAutoReadied or
+                state.lastAutoReadied - state.periodStartAt > 750
+            ) {
             /**
              * Disable if we become unready after auto-ready.
              * 
@@ -215,8 +246,9 @@ updateEnabledStatus(rs) {
              * When a lobby loads, it will briefly present the READY button and allow it to be selected,
              * but will then revert the selection as more players load in.
              * 
-             * To distinguish between user/bug unreadies, we're thresholding on time,
+             * To distinguish between user & bug unreadies, we're thresholding on time,
              * expecting that users will take longer to manually unready than the bug.
+             * We also consider if they have mouse-clicked in the button area since we last readied.
              */
             setEnabled(false)
         }
