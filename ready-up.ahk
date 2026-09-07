@@ -55,12 +55,13 @@ config := {
 }
 
 readyButton := Coords2K(2076, 1284)
+readyButtonBelow := readyButton.copy(, 1384)
 
 state := {
     /**
      * Should we ready up?
      */
-    enabled: false,
+    enabled: true,
     /**
      * Which am I of ReadyState.{S1, S2, S3, S4, Killer}
      * Remembers previous role through matches.
@@ -267,12 +268,22 @@ readyUp() {
         if hwndDbd != hwndActive {
             WinActivate(hwndDbd)
         }
+        /**
+         * The DBD button seems to only be clickable if it's in the hover state.
+         * If cursor is already hovering the button when the button loads in,
+         * e.g. after clicking CONTINUE, then moving within the button boundaries
+         * will NOT result in the hover state.
+         * 
+         * Moving cursor out then in seems to resolve it.
+         */
+        coords.mouseMove(readyButtonBelow)
+        Sleep(10)
         coords.mouseMove(readyButton)
-        Sleep(50) ; No sleep fails. Sleep(1) works most of the time. 50 should be generous.
+        Sleep(10) ; No sleep fails. Sleep(1) works most of the time.
         coords.click(readyButton)
     }
 
-    success := withMouseBlocked(() => doWithRetriesUntilF(clickReadyButton, isReadiedUp, 500, 50))
+    success := withMouseBlocked(() => doWithRetriesUntilF(clickReadyButton, isReadiedUp, 1000, 50))
 
     ; Restore initial state.
     MouseMove(initialX, initialY, 0)
@@ -289,7 +300,7 @@ readyUp() {
         logger.info("Auto-ready Success!")
     } else {
         logger.warn("Ready up failed. Waiting before retry.")
-        Sleep(500)
+        Sleep(3000)
     }
 }
 
