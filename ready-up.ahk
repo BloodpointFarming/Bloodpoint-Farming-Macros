@@ -205,7 +205,19 @@ updateEnabledStatus(rs) {
         }
         onReady()
     } else if previous == ReadyState.Ready and current == ReadyState.Present {
-        if config.disableWhenUnreadySelected and state.lastAutoReadied > state.periodStartAt {
+        if config.disableWhenUnreadySelected and
+            state.lastAutoReadied > state.periodStartAt and
+            state.lastAutoReadied - state.periodStartAt > 750 {
+            /**
+             * Disable if we become unready after auto-ready.
+             * 
+             * This is complicated by a DBD bug (especially on slower PCs).
+             * When a lobby loads, it will briefly present the READY button and allow it to be selected,
+             * but will then revert the selection as more players load in.
+             * 
+             * To distinguish between user/bug unreadies, we're thresholding on time,
+             * expecting that users will take longer to manually unready than the bug.
+             */
             setEnabled(false)
         }
     }
