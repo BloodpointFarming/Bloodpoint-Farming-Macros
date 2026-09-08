@@ -39,6 +39,10 @@ config := {
      * If user is mouse-dragging something, give them time to finish before sending mouse up and readying up.
      */
     waitForDragCompletionSeconds: 5,
+    /**
+     * When a slot flips from Absent -> Present, wait for the game to process the change before auto-readying.
+     */
+    minAbsentToPresentDelayMs: 1500,
     survivor: {
         /**
          * As survivor, do not ready up before all other survivors are in the match to avoid queueing into non-farming survivors.
@@ -76,6 +80,10 @@ state := {
      * Tracks continuous periods when the ready button is visible.
      */
     periodStartAt: 0,
+    /**
+     * Most recent time we observed an Absent -> Present transition for our role.
+     */
+    lastPresentTransitionAt: 0,
     /**
      * Timestamp when we last auto-readied.
      */
@@ -129,15 +137,38 @@ updateReadyState() {
     rs := ReadyState.getState()
     if rs {
         updateRole(rs)
+        updatePresentTransition(rs)
         updateEnabledStatus(rs)
     }
     state.lastReadyState := rs
     return rs
 }
 
+updatePresentTransition(rs) {
+    if not state.myRole
+        return
+
+    wasAbsent := not state.lastReadyState or state.lastReadyState[state.myRole] == ReadyState.Absent
+    isPresent := !!rs[state.myRole]
+    if wasAbsent and isPresent {
+        logger.info("Absent -> Present transition detected.")
+        state.lastPresentTransitionAt := A_TickCount
+    }
+}
+
+shouldDelayReadyAfterPresentTransition() {
+    return state.lastPresentTransitionAt &&
+        A_TickCount - state.lastPresentTransitionAt < config.minAbsentToPresentDelayMs
+}
+
 shouldReadyUp(rs) {
     if not isActive() or not state.myRole or not rs
         return false
+
+    if shouldDelayReadyAfterPresentTransition() {
+        logger.info("Delaying heal. Too soon after Absent -> Present.")
+        return false
+    }
 
     if state.enabled and rs[state.myRole] != ReadyState.Ready {
         if state.myRole == ReadyState.Killer {
