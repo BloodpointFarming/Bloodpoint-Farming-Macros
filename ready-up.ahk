@@ -237,7 +237,7 @@ updateEnabledStatus(rs) {
         if config.disableWhenUnreadySelected and
             state.lastAutoReadied > state.periodStartAt and (
                 state.lastReadyButtonClickAt > state.lastAutoReadied or
-                state.lastAutoReadied - state.periodStartAt > 750
+                A_TickCount - state.lastAutoReadied > 750
             ) {
             /**
              * Disable if we become unready after auto-ready.
