@@ -327,7 +327,7 @@ readyUp() {
         coords.click(readyButton)
     }
 
-    success := withMouseBlocked(() => doWithRetriesUntilF(clickReadyButton, isReadiedUp, 1000, 50))
+    success := withMouseBlocked(() => doWithRetriesUntilF(clickReadyButton, isReadiedUp, 1000, 100))
 
     ; Restore initial state.
     MouseMove(initialX, initialY, 0)
