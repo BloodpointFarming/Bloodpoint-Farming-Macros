@@ -27,11 +27,12 @@ class ReadyState {
         }
 
         ; Tick mark locations
-        static s1 := Coords2K(2365, 1284)
-        static s2 := Coords2K(2350, 1284)
-        static s3 := Coords2K(2336, 1284)
-        static s4 := Coords2K(2321, 1284)
-        static killer := Coords2K(2305, 1288)
+        static yshift := 13 ; patch 10.1.2
+        static s1 := Coords2K(2365, 1284 + yshift)
+        static s2 := Coords2K(2350, 1284 + yshift)
+        static s3 := Coords2K(2336, 1284 + yshift)
+        static s4 := Coords2K(2321, 1284 + yshift)
+        static killer := Coords2K(2305, 1288 + yshift)
         static tickMarkers := [s1, s2, s3, s4, killer]
         static bounds := getBoundingRect(tickMarkers)
 

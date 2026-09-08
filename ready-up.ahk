@@ -54,8 +54,9 @@ config := {
     },
 }
 
-readyButton := Coords2K(2076, 1284)
-readyButtonBelow := readyButton.copy(, 1384)
+yshift := 13 ; patch 10.1.2
+readyButton := Coords2K(2076, 1284 + yshift)
+readyButtonBelow := readyButton.copy(, 1384 + yshift)
 
 state := {
     /**
@@ -95,7 +96,7 @@ state := {
 }
 
 isMouseInReadyButtonRegion() {
-    static tl := Coords2K(1875, 1237), br := Coords2K(2442, 1369)
+    static tl := Coords2K(1875, 1237 + yshift), br := Coords2K(2442, 1369 + yshift)
     clientX := 0
     clientY := 0
     WinGetClientPos(&clientX, &clientY, , , dbdWinTitle)
@@ -192,8 +193,8 @@ areAllSurvivorsAbsent(rs) {
  * @returns {OCR.Result}
  */
 ocrReadyButtonText() {
-    static tl := Coords2K(1875, 1273)
-    static br := Coords2K(2442, 1369)
+    static tl := Coords2K(1875, 1273 + yshift)
+    static br := Coords2K(2442, 1369 + yshift)
     opts := {}
     if dbdWindow.height < 500
         opts.scale := 3
