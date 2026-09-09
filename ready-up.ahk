@@ -123,13 +123,15 @@ isMouseInReadyButtonRegion() {
     return result
 }
 
-
 isActive() => config.requireFocus ? WinActive(dbdWinTitle) : WinExist(dbdWinTitle)
 
 CheckReadyState() {
     rs := updateReadyState()
-    if shouldReadyUp(rs)
-        readyUp()
+    if shouldUnready(rs) {
+        changeReadyState(() => not isReadiedUp())
+    } else if shouldReadyUp(rs) {
+        changeReadyState(() => isReadiedUp())
+    }
 }
 
 /**
@@ -171,7 +173,7 @@ shouldReadyUp(rs) {
         return false
 
     if state.myReadiedRole and state.myRole != state.myReadiedRole {
-        logger.info("Refusing to ready up as different role that .")
+        logger.info("Refusing to ready up as different role.")
         return false
     }
 
@@ -202,6 +204,23 @@ shouldReadyUp(rs) {
             } else {
                 return true
             }
+        }
+    }
+    return false
+}
+
+shouldUnready(rs) {
+    if not state.enabled or not isActive() or not state.myRole or not rs
+        return false
+
+    /**
+     * When the survivor host leaves, DBD auto readies you into solo queue.
+     * Whyyyy???
+     */
+    if state.myRole == ReadyState.S1 and rs[state.myRole] == ReadyState.Ready {
+        for role in [ReadyState.S2, ReadyState.S3, ReadyState.S4] {
+            if rs[role] == ReadyState.Absent
+                return true
         }
     }
     return false
@@ -329,7 +348,7 @@ setMyRole(role) {
     }
 }
 
-readyUp() {
+changeReadyState(successCondition := isReadiedUp) {
     if not state.enabled or not isActive()
         return
 
@@ -337,10 +356,8 @@ readyUp() {
     waitForMouseAccess()
     if A_TickCount - start > 200 {
         ; DBD might be occluded now. Better recheck.
-        if not shouldReadyUp(updateReadyState()) {
-            logger.info("Can no longer ready up after user held mouse button. Aborting attempt.")
-            return
-        }
+        SetTimer(() => CheckReadyState(), -1)
+        return 
     }
 
     ; Capture the initial state to restore later
@@ -348,7 +365,7 @@ readyUp() {
     hwndActive := WinActive("A")
     hwndDbd := WinExist(dbdWinTitle)
 
-    logger.info("Readying up")
+    logger.info("Changing ready state")
 
     clickReadyButton() {
         if hwndDbd != hwndActive {
@@ -369,7 +386,7 @@ readyUp() {
         coords.click(readyButton)
     }
 
-    success := withMouseBlocked(() => doWithRetriesUntilF(clickReadyButton, isReadiedUp, 1000, 100))
+    success := withMouseBlocked(() => doWithRetriesUntilF(clickReadyButton, successCondition, 1000, 100))
 
     ; Restore initial state.
     MouseMove(initialX, initialY, 0)
@@ -385,7 +402,7 @@ readyUp() {
         onReady()
         logger.info("Auto-ready Success!")
     } else {
-        logger.warn("Ready up failed. Waiting before retry.")
+        logger.warn("Changing ready state failed. Waiting before retry.")
         Sleep(3000)
     }
 }
