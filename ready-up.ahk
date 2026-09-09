@@ -42,7 +42,7 @@ config := {
     /**
      * When a slot flips from Absent -> Present, wait for the game to process the change before auto-readying.
      */
-    minAbsentToPresentDelayMs: 1500,
+    minAbsentToPresentDelayMs: 900,
     survivor: {
         /**
          * As survivor, do not ready up before all other survivors are in the match to avoid queueing into non-farming survivors.
