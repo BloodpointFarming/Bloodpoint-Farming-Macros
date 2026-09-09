@@ -73,6 +73,11 @@ state := {
      */
     myRole: 0,
     /**
+     * Which role did we auto-ready as?
+     * If we switch from Surv to Killer to spend, it should NOT ready as Killer.
+     */
+    myReadiedRole: 0,
+    /**
      * For detecting ready state transitions.
      */
     lastReadyState: false,
@@ -165,8 +170,13 @@ shouldReadyUp(rs) {
     if not isActive() or not state.myRole or not rs
         return false
 
+    if state.myReadiedRole and state.myRole != state.myReadiedRole {
+        logger.info("Refusing to ready up as different role that .")
+        return false
+    }
+
     if shouldDelayReadyAfterPresentTransition() {
-        logger.info("Delaying heal. Too soon after Absent -> Present.")
+        logger.info("Delaying ready up. Too soon after Absent -> Present.")
         return false
     }
 
@@ -405,6 +415,9 @@ setEnabled(newIsEnabled) {
         logger.info("Auto-ready: " (newIsEnabled ? "ON" : "off"))
         state.enabled := newIsEnabled
         showStatusToolTip()
+    }
+    if newIsEnabled {
+        state.myReadiedRole := state.myRole
     }
 }
 
