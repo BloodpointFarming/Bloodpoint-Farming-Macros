@@ -146,6 +146,7 @@ updateReadyState() {
     rs := ReadyState.getState()
     if rs {
         updateRole(rs)
+        updatePeriodStartAt(rs)
         updatePresentTransition(rs)
         updateEnabledStatus(rs)
     }
