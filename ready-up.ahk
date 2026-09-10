@@ -99,6 +99,8 @@ state := {
     lastReadyButtonClickAt: 0
 }
 
+status := ToolTipInstance(readyButton.copy(, readyButton.y + 100))
+
 ~LButton:: {
     if !WinActive(dbdWinTitle)
         return
@@ -148,7 +150,29 @@ updateReadyState() {
         updateEnabledStatus(rs)
     }
     state.lastReadyState := rs
+    updateStatusTooltip(rs)
     return rs
+}
+updateStatusTooltip(rs) {
+    if not rs or not isActive() {
+        status.hide()
+        return
+    }
+
+    if state.enabled {
+        if state.myRole {
+            if rs[state.myRole] == ReadyState.Ready {
+                status.hide()
+            } else {
+                roleText := state.myRole = ReadyState.Killer ? "Killer" : "Survivor"
+                status.setText("Waiting (" roleText ")")
+            }
+        } else {
+            status.setText("Role ambiguous. Waiting until clear.")
+        }
+    } else {
+        status.setText("Disabled")
+    }
 }
 
 updatePresentTransition(rs) {
@@ -357,7 +381,7 @@ changeReadyState(successCondition := isReadiedUp) {
     if A_TickCount - start > 200 {
         ; DBD might be occluded now. Better recheck.
         SetTimer(() => CheckReadyState(), -1)
-        return 
+        return
     }
 
     ; Capture the initial state to restore later
@@ -431,16 +455,8 @@ setEnabled(newIsEnabled) {
     if state.enabled != newIsEnabled {
         logger.info("Auto-ready: " (newIsEnabled ? "ON" : "off"))
         state.enabled := newIsEnabled
-        showStatusToolTip()
     }
     if newIsEnabled {
         state.myReadiedRole := state.myRole
     }
-}
-
-showStatusToolTip() {
-    static status := ToolTipInstance(readyButton.copy(, readyButton.y + 100))
-    msg := "Auto-ready " (state.enabled ? "ON" : "off") "."
-    status.setText(msg)
-    SetTimer(() => status.lastText == msg ? status.hide() : true, -3000)
 }
