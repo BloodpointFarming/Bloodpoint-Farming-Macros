@@ -131,9 +131,12 @@ CheckReadyState() {
     rs := updateReadyState()
     if shouldUnready(rs) {
         changeReadyState(() => not isReadiedUp())
+        rs := ReadyState.getState()
     } else if shouldReadyUp(rs) {
         changeReadyState(() => isReadiedUp())
+        rs := ReadyState.getState()
     }
+    updateStatusTooltip(rs)
 }
 
 /**
@@ -151,7 +154,6 @@ updateReadyState() {
         updateEnabledStatus(rs)
     }
     state.lastReadyState := rs
-    updateStatusTooltip(rs)
     return rs
 }
 updateStatusTooltip(rs) {
