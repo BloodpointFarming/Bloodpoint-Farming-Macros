@@ -23,12 +23,7 @@ class PBitmapImage {
         Gdip_GetImageDimensions(pBitmap, &width, &height)
         this.width := width
         this.height := height
-
-        this.isLocked := true
-        Gdip_LockBits(pBitmap, 0, 0, width, height, &stride, &scan0, &bitmapData)
-        this.bitmapData := bitmapData
-        this.stride := stride
-        this.scan0 := scan0
+        this.lock()
     }
 
     getColor(x, y) {
@@ -52,12 +47,26 @@ class PBitmapImage {
         }
     }
 
+    /**
+     * Unlocks the image, allowing Gdip_DrawImage() to work.
+     */
     unlock() {
         if this.isLocked {
             data := this.bitmapData
             Gdip_UnlockBits(this.pBitmap, &data)
             this.isLocked := false
         }
+    }
+
+    /**
+     * Locks the image, allowing getColor() to work.
+     */
+    lock() {
+        this.isLocked := true
+        Gdip_LockBits(this.pBitmap, 0, 0, this.width, this.height, &stride, &scan0, &bitmapData)
+        this.bitmapData := bitmapData
+        this.stride := stride
+        this.scan0 := scan0
     }
 
     /**
@@ -97,4 +106,38 @@ class PBitmapImage {
     }
 
     static of(x, y, w, h) => capture.of(x, y, w, h)
+}
+
+/**
+ * Creates a new image with extra padding on all sides.
+ * Intended to improve OCR input.
+ * 
+ * @param {PBitmapImage}
+ * @param {Integer} paddingX on each side
+ * @param {Integer} paddingY on each side
+ * @param {Integer} color fill color
+ * @returns {PBitmapImage} 
+ */
+padImage(img, paddingX := 20, paddingY := 20, color := 0xFF000000) {
+    locked := img.isLocked
+    if locked
+        img.unlock()
+
+    pw := img.width + paddingX * 2
+    ph := img.height + paddingY * 2
+
+    padded := Gdip_CreateBitmap(pw, ph)
+    g := Gdip_GraphicsFromImage(padded)
+
+    brush := Gdip_BrushCreateSolid(color)
+    Gdip_FillRectangle(g, brush, 0, 0, pw, ph)
+    Gdip_DeleteBrush(brush)
+
+    Gdip_DrawImage(g, img.pBitmap, paddingX, paddingY, img.width, img.height)
+
+    Gdip_DeleteGraphics(g)
+
+    if locked
+        img.lock()
+    return PBitmapImage(padded)
 }
