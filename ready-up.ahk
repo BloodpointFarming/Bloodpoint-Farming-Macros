@@ -167,7 +167,7 @@ updateStatusTooltip(rs) {
             if rs[state.myRole] == ReadyState.Ready {
                 status.hide()
             } else {
-                roleText := state.myRole = ReadyState.Killer ? "Killer" : "Survivor"
+                roleText := state.myReadiedRole = ReadyState.Killer ? "Killer" : "Survivor"
                 status.setText("Waiting (" roleText ")")
             }
         } else {
