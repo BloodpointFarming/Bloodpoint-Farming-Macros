@@ -121,6 +121,10 @@ class KeyBind {
          * {@returns InputMapping.AhkKey}
          */
         interact => this.getMapping().bindingFor("Interact_Slasher").withDefault("Space")
+        /**
+         * {@returns InputMapping.AhkKey}
+         */
+        usePower => this.getMapping().bindingFor("ItemUse_Slasher")
     }
 }
 
