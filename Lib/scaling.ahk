@@ -44,7 +44,12 @@ class DbdWindowOps {
  */
 class WindowOps {
     clientToScreen(x, y) {
-        WinGetClientPos(&clientX, &clientY,,, dbdWinTitle)
+        clientX := 0, clientY := 0
+        try {
+            WinGetClientPos(&clientX, &clientY, , , dbdWinTitle)
+        } catch Error as e {
+            logger.warn("WinGetClientPos(" dbdWinTitle ") failed. " e.What)
+        }
         return [clientX + x, clientY + y]
     }
 
