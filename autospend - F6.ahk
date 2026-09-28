@@ -106,7 +106,7 @@ openBloodwebTab() {
     ; but I seem to get more Bloodweb Error when I do that.
     ; Since we only do this when we're starting to spend, it's not worth it.
     loop 1 {
-        coords.click(bloodwebTab) ; bloodweb tab
+        slowClick(bloodwebTab) ; bloodweb tab
         Sleep(100)
     }
 }
@@ -116,7 +116,7 @@ autospend() {
         state := { level: -1 } ; {} to allow arrow function to mutate thiss
         if not waitUntilF(() => (state.level := getBloodwebLevel()) > 0, 5000) {
             logger.info("Level did not appear. Opening bloodweb.")
-            coords.click(bloodwebTab) ; bloodweb tab
+            slowClick(bloodwebTab) ; bloodweb tab
             continue
         }
         level := state.level
@@ -242,7 +242,7 @@ bulkSpend() {
 
     ; Open bulk dialog
     waitUntilF(() => Bloodweb.isBulkSpendVisible())
-    coords.click(Bloodweb.bulkSpendButton)
+    slowClick(Bloodweb.bulkSpendButton)
 
     Sleep(100) ; it loads fast. probably overkill.
 
@@ -290,9 +290,9 @@ bulkSpend() {
 
 cycleBloodwebTab() {
     logger.info("Cycling bloodweb")
-    coords.click(bloodwebTab)
+    slowClick(bloodwebTab)
     Sleep(100)
-    coords.click(bloodwebTab)
+    slowClick(bloodwebTab)
 }
 
 hasLevelChanged() {
@@ -471,9 +471,9 @@ slowClick(p, holdTime := 50) {
         return
 
     logger.debug("Clicking " p.toString())
-    coords.click(p, "down")
-    Sleep(holdTime)
-    coords.click(p, "up")
+    coords.mouseMove(p)
+    Sleep(32)
+    coords.hold(p, holdTime)
 }
 
 clickNode(node) {
