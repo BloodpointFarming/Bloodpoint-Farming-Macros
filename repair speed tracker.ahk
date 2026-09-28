@@ -61,8 +61,8 @@ config := {
 
 hudCoords := Coords2K(339, 563) ; empty spot near the player's HUD portrait
 tooltips := {
-    recentSpeed: ToolTipInstance(() => hudCoords.scaledX(), () => hudCoords.scaledY()),
-    totalSpeed: ToolTipInstance(() => hudCoords.scaledX(), () => hudCoords.scaledY() + 24),
+    recentSpeed: ToolTipInstance(hudCoords),
+    totalSpeed: ToolTipInstance(hudCoords.copy(, hudCoords.y + 24)),
 }
 
 if config.tsv.enabled and not DirExist(config.tsv.outputDir)
