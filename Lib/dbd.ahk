@@ -74,7 +74,7 @@ isAbandonTabOptionVisible() => findAbandonText(Coords2K(2240, 88), Coords2K(2376
  */
 findMatchDetailsAbandonButton() => findAbandonOrQuitText(Coords2K(2140, 1260), Coords2K(2560, 1440))
 
-findAbandonConfirmButton() => findAbandonText(Coords2K(1650, 1000), Coords2K(2000, 1300))
+findAbandonConfirmButton() => findAbandonOrQuitText(Coords2K(1650, 1000), Coords2K(2000, 1300))
 
 findAbandonText(tl, br) {
     result := OcrShim.fromRect(tl, br)
