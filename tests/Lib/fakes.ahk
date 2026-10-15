@@ -129,15 +129,15 @@ setupFakeWindow(screenshotPath) {
     return pBitmap
 }
 
-assertFor(screenshot, predicate) => assertForScreenshot(A_ScriptDir "\screenshots\" screenshot, predicate)
+assertFor(screenshot, predicate) => assertForScreenshot(A_ScriptDir "\screenshots\" screenshot, predicate, -2)
 
-assertForScreenshot(file, predicate) {
+assertForScreenshot(file, predicate, depth := -1) {
     screenshotPath := file
     try {
         pBitmap := setupFakeWindow(screenshotPath)
         if not predicate.Call() {
             SplitPath(file, &fileName)
-            throw Error(fileName " did not pass predicate", -1)
+            throw Error(fileName " did not pass predicate", depth)
         }
     } finally {
         Gdip_DisposeImage(pBitmap)

@@ -6,7 +6,7 @@ class StackClass {
         try {
             throw Error("Capture stack", -3)
         } catch as e {
-            this.lines := lines := StrSplit(e.Stack, "`n")
+            this.lines := StrSplit(e.Stack, "`n")
         }
     }
 

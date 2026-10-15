@@ -9,18 +9,18 @@ class LoggerOps {
         OutputDebug(A_TickCount " " msg "`n")
     }
     error(msg) {
-        this.write("error: " msg)
+        this.write("error: " String(msg))
     }
     warn(msg) {
-        this.write("warn: " msg)
+        this.write("warn: " String(msg))
     }
     info(msg) {
-        this.write("info: " msg)
+        this.write("info: " String(msg))
     }
     debug(msg) {
-        ; this.write("debug: " msg)
+        ; this.write("debug: " String(msg))
     }
     trace(msg) {
-        ; this.write("trace: " msg)
+        ; this.write("trace: " String(msg))
     }
 }
