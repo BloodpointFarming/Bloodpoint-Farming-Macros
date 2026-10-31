@@ -42,8 +42,10 @@ abandonMatch() {
 
     Send("{ESC}")
     abandonButtonBottomRight := waitUntilF(findMatchDetailsAbandonButton, 500)
-    if not abandonButtonBottomRight
+    if not abandonButtonBottomRight {
+        logger.warn("⚠️ Abandon button missing.")
         return
+    }
 
     logger.info("Found bottom right button")
     confirmButton := doWithRetriesUntilF(
@@ -52,8 +54,10 @@ abandonMatch() {
         3000,
         100
     )
-    if not confirmButton
+    if not confirmButton {
+        logger.warn("⚠️ Confirm button missing.")
         return
+    }
 
     clickWord(confirmButton)
 }
@@ -64,10 +68,5 @@ clickWord(word) {
     y := Integer(word.opts.y + rect.y + rect.h / 4) ; aim towards top for upwards moving text
     logger.debug("Clicking " x ", " y)
 
-    moveAndClick() {
-        Click(x, y, "Down")
-        Sleep(50)
-        Click(x, y, "Up")
-    }
-    withMouseBlocked(moveAndClick)
+    ops.clickHold(x, y)
 }

@@ -64,7 +64,20 @@ class WindowOps {
 
     click(x, y, options := "") {
         screenPos := this.clientToScreen(x, y)
-        withMouseBlocked(() => Click(screenPos[1] " " screenPos[2] " " options))
+        Click(screenPos[1] " " screenPos[2] " " options)
+    }
+
+    clickHold(x, y, durationMs := 50) {
+        screenPos := this.clientToScreen(x, y)
+        cx := screenPos[1]
+        cy := screenPos[2]
+        clicks() {
+            Click(cx " " cy " Down")
+            Sleep(50)
+            Click(cx " " cy " Up")
+        }
+
+        withMouseBlocked(clicks)
     }
 
     mouseMove(x, y) {
