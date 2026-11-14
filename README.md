@@ -39,6 +39,7 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 
 - Simple, efficient crosshair for DBD.
 - To switch crosshair to another DBD window, focus that window, then reload the macro.
+
   ![Crosshair macro running in system tray](assets/crosshair.png)
 
 ### Tally
