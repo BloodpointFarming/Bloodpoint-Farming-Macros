@@ -1,5 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
+Persistent
 
 /**
  * Simple, efficient crosshair for DBD
