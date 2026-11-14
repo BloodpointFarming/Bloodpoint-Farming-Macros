@@ -17,7 +17,7 @@ color := "00ff00"   ; any AHK color name or hex, e.g. "00FF00"
 
 ; ---- Track the game window ----
 dbdWinTitle := "DeadByDaylight ahk_classUnrealWindow"
-dbdHwnd := WinWait(dbdWinTitle)
+dbdHwnd := WaitForDbdWindow()
 
 ; ---- Build overlay ----
 half := arm + gap + thick / 2
@@ -155,16 +155,24 @@ WindowEventProc(hook, event, hwnd, idObject, idChild, threadId, eventTime) {
         closedDbdHwnd := dbdHwnd
         dbdHwnd := 0
         ch.Hide()
-        SetTimer(WaitForDbdWindow, -1)
+        SetTimer(ReattachToDbdWindow, -1)
     } else if (event = 0x800B) {
         UpdateCrosshair()
     }
 }
 
 WaitForDbdWindow() {
-    global dbdHwnd, dbdWinTitle, ch, closedDbdHwnd
+    global dbdWinTitle
+    A_IconTip := "Crosshair: Waiting for DBD"
+    hwnd := WinWait(dbdWinTitle)
+    A_IconTip := "Crosshair: Attached"
+    return hwnd
+}
+
+ReattachToDbdWindow() {
+    global dbdHwnd, ch, closedDbdHwnd
     WinWaitClose("ahk_id " closedDbdHwnd)
-    dbdHwnd := WinWait(dbdWinTitle)
+    dbdHwnd := WaitForDbdWindow()
     UpdateCrosshair(true)
 }
 
