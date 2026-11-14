@@ -35,6 +35,12 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 ### Continue
 - Auto-clicks the CONTINUE button.
 
+### Crosshair
+
+- Simple, efficient crosshair for DBD.
+- To switch crosshair to another DBD window, focus that window, then reload the macro.
+  ![Crosshair macro running in system tray](assets/crosshair.png)
+
 ### Tally
 - Captures BP, Scoreboard, Emblems, XP, etc. during the Tally screen and saves a screenshot to `%userprofile%\Pictures\dbd-matches\`.
 - Keeps newest 300 screenshots
@@ -42,6 +48,7 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
   <summary>Screenshot</summary>
   <img src="assets/tally.jpg" alt="Sample image of tally screen produced by the macro" width="600"/>
   </details>
+- See also: [DBD Recent Match History](https://stats.deadbydaylight.com), [DBD Detailed Match History](https://greasyfork.org/en/scripts/562996-dbd-detailed-match-history)
 
 ### Tally Continue
 - Does everything that [Tally](#Tally) does, but also...
