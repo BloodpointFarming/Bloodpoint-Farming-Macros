@@ -37,8 +37,13 @@ Macros to help with the repetitive/tedious aspects of farming bloodpoints in Dea
 
 ### Crosshair
 
-- Simple, efficient crosshair for DBD.
-- To switch crosshair to another DBD window, focus that window, then reload the macro.
+- Small, simple, efficient.
+- Free and open source (unlike Crosshair X)
+- Transparent to video recordings (unlike reshade xhair.fx)
+- Small (~7 KB, unlike dotline 88.5MB)
+- 0% CPU, 15 MB of RAM (no idea how much the others use)
+- No hotkeys. For multiple DBD windows, focus the Clown window, then reload the macro to snap the crosshair to it.
+- Invisible to Steam status (unlike other Steam crosshairs)
 
   ![Crosshair macro running in system tray](assets/crosshair.png)
 
